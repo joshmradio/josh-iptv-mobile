@@ -396,8 +396,8 @@ body.guideOpen #v16PreviewSound{display:block!important}
 }
 </style>
 </head><body>
-<section id="setup"><div class="card"><div class="brand">JOSH IPTV <span style="font-size:13px;color:#8d98aa">MOBILE V1</span></div><div class="sub">Paste a playlist URL or load an M3U file. That's it.</div><div class="urlrow"><input id="url" placeholder="Paste Dropbox/raw M3U URL"><button class="primary" id="loadUrl">LOAD</button></div><div class="or">OR</div><button class="secondary" id="choose">CHOOSE M3U FILE</button><input id="file" type="file" accept=".m3u,.m3u8,text/plain,application/x-mpegURL,audio/mpegurl" class="hidden"><div id="setupError" class="error"></div><div class="hint">Direct URL loading depends on the host allowing browser access. If Dropbox or another host blocks it, choose the M3U file directly. Josh IPTV remembers your favorites and last channel in this browser.</div></div></section>
-<section id="app" class="hidden"><header class="top"><div class="brand">JOSH IPTV</div><select id="mobileGroups" class="mobileGroups"></select><span id="status" class="status"></span><input id="search" class="search" placeholder="Search channels"><button id="guideBtn" class="secondary small">GUIDE</button><button id="v16SettingsBtn" class="secondary small">⚙ SETTINGS</button><button id="reload" class="secondary small">Playlist</button></header><main class="layout"><aside id="groups" class="groups"></aside><section id="channels" class="channels"></section><section class="stage"><div class="videoWrap"><video id="video" autoplay playsinline></video><button type="button" id="v16PreviewSound" title="Toggle mini-player sound">🔊 UNMUTE</button><div id="v7SoundPrompt" class="v7SoundPrompt"><span>🔊 CLICK FOR SOUND</span></div><div id="empty" class="empty"><b>Select a channel</b><br><span style="font-size:12px">Your stream will play here</span></div></div><div class="now"><img id="nowLogo"><div style="min-width:0;flex:1"><div id="nowName" class="nowName">No channel selected</div><div id="nowProgram" class="nowProgram"></div></div><span id="nowGroup" class="badge"></span></div></section></main></section>
+<section id="setup"><div class="card"><div class="brand">JOSH IPTV <span style="font-size:13px;color:#8d98aa">MOBILE V3</span></div><div class="sub">Paste a playlist URL or load an M3U file. That's it.</div><div class="urlrow"><input id="url" placeholder="Paste Dropbox/raw M3U URL"><button class="primary" id="loadUrl">LOAD</button></div><div class="or">OR</div><button class="secondary" id="choose">CHOOSE M3U FILE</button><input id="file" type="file" accept=".m3u,.m3u8,text/plain,application/x-mpegURL,audio/mpegurl" class="hidden"><div id="setupError" class="error"></div><div class="hint">Direct URL loading depends on the host allowing browser access. If Dropbox or another host blocks it, choose the M3U file directly. Josh IPTV remembers your favorites and last channel in this browser.</div></div></section>
+<section id="app" class="hidden"><header class="top"><div class="brand">JOSH IPTV</div><select id="mobileGroups" class="mobileGroups"></select><span id="status" class="status"></span><input id="search" class="search" placeholder="Search channels"><button id="guideBtn" class="secondary small">GUIDE</button><button id="v16SettingsBtn" class="secondary small">⚙ SETTINGS</button><button id="reload" class="secondary small">Playlist</button></header><main class="layout"><aside id="groups" class="groups"></aside><section id="channels" class="channels"></section><section class="stage"><div class="videoWrap"><video id="video" autoplay playsinline></video><button type="button" id="v16PreviewSound" title="Toggle mini-player sound">🔊 UNMUTE</button><div id="v7SoundPrompt" class="v7SoundPrompt"><span>🔊 CLICK FOR SOUND</span></div><div id="v3PlaybackHint" aria-live="polite" style="display:none;position:absolute;left:8px;right:8px;bottom:54px;background:rgba(0,0,0,.84);border:1px solid #777;color:white;border-radius:8px;padding:10px;font-size:12px;z-index:97"></div><div id="empty" class="empty"><b>Select a channel</b><br><span style="font-size:12px">Your stream will play here</span></div></div><div class="now"><img id="nowLogo"><div style="min-width:0;flex:1"><div id="nowName" class="nowName">No channel selected</div><div id="nowProgram" class="nowProgram"></div></div><span id="nowGroup" class="badge"></span></div></section></main></section>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.13/dist/hls.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.8.0/dist/mpegts.min.js"></script>
 <script>
@@ -499,12 +499,18 @@ function play(c){
   destroyPlayback();
   streamAudioChannels=null;updateStreamSpecs();
   const v=$('#video');
-  const url=c.url;
+  let url=c.url;
+  const securePage=location.protocol==='https:';
+  const insecureStream=/^http:\/\//i.test(url);
+  if(securePage && insecureStream){
+    url=url.replace(/^http:/i,'https:');
+    setPlaybackStatus('Trying secure stream connection • '+c.name);
+  }
   const clean=url.split('?')[0].toLowerCase();
   const looksHls=clean.endsWith('.m3u8') || /\.m3u8(?:\?|$)/i.test(url);
   const looksTs=clean.endsWith('.ts') || /\/live\/[^/]+\/[^/]+\/\d+(?:\.ts)?(?:\?|$)/i.test(url);
 
-  setPlaybackStatus(`Loading • ${c.name}`);
+  setPlaybackStatus(securePage && insecureStream ? `Trying HTTPS for ${c.name} (provider must support HTTPS)` : `Loading • ${c.name}`);
 
   if(looksHls && v.canPlayType('application/vnd.apple.mpegurl')){
     playNative(url,c); return;
@@ -545,6 +551,10 @@ function play(c){
     }catch(e){}
   }
 
+  if(/iPhone|iPad|iPod/i.test(navigator.userAgent) && looksTs){
+    setPlaybackStatus('Safari cannot play this TS stream directly. An HTTPS HLS stream may be needed.');
+    return;
+  }
   playNative(url,c);
 }
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -1253,6 +1263,32 @@ const V15=(()=>{
   v.addEventListener('error',()=>{const status=document.getElementById('status');if(status&&v.error)status.textContent='Stream not supported on iPhone or network blocked';});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',prepare);else prepare();
+})();
+</script>
+
+<script>
+/* Mobile V3: playback diagnostics for HTTPS-hosted iPhone Safari. */
+(function(){
+  const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent); if(!ios)return;
+  let check=0;
+  function show(msg){const el=document.getElementById('v3PlaybackHint');if(!el)return;el.textContent=msg;el.style.display=msg?'block':'none';}
+  function checkStream(){
+    const v=document.getElementById('video');if(!v||!window.state||!state.active)return;
+    if(v.videoWidth>0 && v.readyState>=2){show('');return;}
+    const u=state.active.url||'';
+    if(location.protocol==='https:' && /^http:\/\//i.test(u)){
+      show('This channel uses HTTP. Safari on a secure website requires HTTPS streams. V3 is trying HTTPS, but your provider must support it.');
+    }else if(/\.ts(?:\?|$)/i.test(u)){
+      show('This MPEG-TS stream may not be supported in iPhone Safari. Try a provider HLS (.m3u8) version.');
+    }else{show('No playable video received. The stream may be blocked by CORS, its format, or the server.');}
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const v=document.getElementById('video');if(!v)return;
+    v.addEventListener('playing',()=>show(''));
+    v.addEventListener('loadeddata',()=>show(''));
+    v.addEventListener('error',()=>checkStream());
+    setInterval(checkStream,9000);
+  });
 })();
 </script>
 </body></html>
