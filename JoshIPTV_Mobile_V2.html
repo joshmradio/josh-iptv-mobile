@@ -1,0 +1,1258 @@
+<!doctype html>
+<html class="v6Booting" lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Josh IPTV Mobile</title>
+<style>
+:root{color-scheme:dark;--bg:#080b10;--panel:#10151d;--panel2:#171e29;--text:#f5f7fb;--muted:#8d98aa;--accent:#4f8cff;--line:#252e3c}*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}button,input{font:inherit}.hidden{display:none!important}
+#setup{height:100vh;display:grid;place-items:center;padding:28px;background:radial-gradient(circle at 50% 0,#172338 0,#080b10 48%)}.card{width:min(680px,100%);background:#10151de8;border:1px solid var(--line);border-radius:22px;padding:34px;box-shadow:0 24px 80px #0008}.brand{font-size:34px;font-weight:800;letter-spacing:-1px}.sub{color:var(--muted);margin:8px 0 26px}.urlrow{display:flex;gap:10px}.urlrow input{flex:1;background:#090d13;border:1px solid #303a4b;color:white;border-radius:12px;padding:14px}.primary,.secondary{border:0;border-radius:12px;padding:13px 18px;font-weight:700;cursor:pointer}.primary{background:var(--accent);color:white}.secondary{background:#202938;color:white}.or{text-align:center;color:#6f7a8c;margin:18px}.hint{font-size:12px;color:#6f7a8c;margin-top:18px;line-height:1.5}.error{margin-top:14px;color:#ff8d8d;font-size:13px}
+#app{height:100vh;display:grid;grid-template-rows:64px 1fr}.top{display:flex;align-items:center;gap:18px;padding:0 18px;border-bottom:1px solid var(--line);background:#0d1219}.top .brand{font-size:21px}.search{margin-left:auto;width:min(340px,35vw);background:#171e29;border:1px solid #2c3544;color:white;border-radius:10px;padding:10px 12px}.layout{min-height:0;display:grid;grid-template-columns:210px 360px 1fr}.groups,.channels{min-height:0;overflow:auto;border-right:1px solid var(--line);background:var(--panel)}.groups{padding:12px}.g{padding:12px;border-radius:10px;color:#c6cfdb;cursor:pointer;margin-bottom:3px;display:flex;justify-content:space-between;gap:8px}.g:hover,.g.active{background:#202938;color:white}.count{color:#748096;font-size:12px}.channels{background:#0c1118}.channel{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;padding:10px 12px;border-bottom:1px solid #171e29;cursor:pointer}.channel:hover,.channel.active{background:#192231}.logo{width:48px;height:34px;object-fit:contain;background:#fff0;border-radius:6px}.cname{font-weight:650;font-size:14px}.meta{font-size:11px;color:#778396;margin-top:4px}.star{font-size:20px;color:#687386;padding:5px}.star.on{color:#ffd65a}.stage{min-width:0;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;background:#030507}.videoWrap{position:relative;display:grid;place-items:center;min-height:0}.videoWrap video{width:100%;height:100%;object-fit:contain;background:#000}.empty{position:absolute;text-align:center;color:#697589}.now{padding:16px 20px;background:#10151d;border-top:1px solid var(--line);display:flex;align-items:center;gap:14px}.now img{width:64px;height:44px;object-fit:contain}.nowName{font-size:18px;font-weight:750}.nowProgram{font-size:13px;color:#aab4c3;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55vw}.badge{font-size:11px;color:#9fb6da;background:#1c2a40;border-radius:999px;padding:5px 8px}.small{padding:9px 12px}.status{font-size:12px;color:#8995a7}.mobileGroups{display:none}@media(max-width:900px){.layout{grid-template-columns:160px 270px 1fr}.groups{font-size:13px}}@media(max-width:700px){body{overflow:auto}#app{height:auto;min-height:100vh}.layout{display:block}.groups{display:none}.channels{height:42vh;border-right:0}.stage{height:55vh}.mobileGroups{display:block;background:#171e29;color:white;border:1px solid #303a4b;border-radius:9px;padding:9px}.search{width:40vw}.top{gap:8px}.top .brand{font-size:17px}}
+
+.epgBtn{padding:9px 12px}
+.epgNow{font-size:12px;color:#b7c3d6;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.epgNext{font-size:11px;color:#748096;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nowProg{font-size:13px;color:#c8d2df;margin-top:4px}
+.guideOverlay{position:fixed;inset:0;background:#080b10;z-index:50;display:grid;grid-template-rows:64px 1fr}
+.guideTop{display:flex;align-items:center;gap:12px;padding:0 18px;background:#0d1219;border-bottom:1px solid var(--line)}
+.guideTitle{font-size:20px;font-weight:800}.guideDate{font-size:12px;color:#8995a7}
+.guideGridWrap{overflow:auto;position:relative}
+.guideGrid{min-width:1120px}
+.guideTimes{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:240px repeat(6,180px);height:42px;background:#111720;border-bottom:1px solid #283141}
+.guideTimes>div{padding:12px;border-right:1px solid #283141;font-size:12px;color:#9aa7ba}
+.guideRow{display:grid;grid-template-columns:240px 1080px;min-height:66px;border-bottom:1px solid #1b2330}
+.guideChan{position:sticky;left:0;z-index:3;background:#0d1219;display:flex;align-items:center;gap:10px;padding:8px 12px;border-right:1px solid #283141;cursor:pointer}
+.guideChan:hover{background:#192231}.guideChan img{width:48px;height:34px;object-fit:contain}
+.guideChanName{font-size:13px;font-weight:700}
+.guidePrograms{position:relative;background:repeating-linear-gradient(to right,#0a0f16 0,#0a0f16 179px,#202938 180px)}
+.guideProgram{position:absolute;top:6px;bottom:6px;border:1px solid #303b4d;background:#17202d;border-radius:7px;padding:7px 9px;overflow:hidden;cursor:pointer}
+.guideProgram:hover{background:#202d3f}.guideProgram.current{background:#20314a;border-color:#47668f}
+.guideProgramTitle{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.guideProgramTime{font-size:10px;color:#8e9aae;margin-top:4px}
+.epgModal{position:fixed;inset:0;background:#000a;z-index:60;display:grid;place-items:center}
+.epgCard{width:min(620px,90vw);background:#121923;border:1px solid #303a4b;border-radius:16px;padding:22px;box-shadow:0 20px 70px #000}
+.epgRow{display:flex;gap:8px;margin-top:14px}.epgRow input{flex:1;background:#0b1017;border:1px solid #303a4b;color:white;border-radius:9px;padding:11px}
+
+
+.epgLayer{position:fixed;inset:0;background:#000b;z-index:90;display:grid;place-items:center}
+.epgCard{width:min(680px,90vw);background:#101720;border:1px solid #303a4a;border-radius:14px;padding:22px}
+.epgHead,.guideHead{display:flex;align-items:center;gap:14px}.epgHead button,.guideHead button{margin-left:auto}
+.epgControls{display:flex;gap:8px;margin-top:16px}.epgControls input{flex:1;background:#0a1017;color:#fff;border:1px solid #303a4a;border-radius:8px;padding:10px}
+.guideLayer{position:fixed;inset:0;background:#090d12;z-index:80;display:grid;grid-template-rows:324px 48px 1fr}
+.guidePreview{display:grid;grid-template-columns:576px minmax(0,1fr);background:#0b1016;border-bottom:1px solid #283241;min-height:0}
+.guideVideoBox{background:#000;position:relative;overflow:hidden}
+.guideVideoBox video{width:100%;height:100%;object-fit:contain;background:#000}
+.guideInfo{padding:24px 28px;min-width:0;position:relative}
+.guideInfoTitle{font-size:25px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:50px}
+.guideInfoMeta{font-size:15px;color:#9ba7b8;margin-top:8px}
+.guideInfoDesc{font-size:14px;color:#c3cad5;line-height:1.45;margin-top:14px;max-width:1000px}
+.guideInfoChannel{font-size:12px;color:#72b7ff;margin-top:14px}
+.streamSpecs{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.streamSpec{font-size:12px;font-weight:700;color:#dbe6f5;background:#242a36;border:1px solid #3c4658;border-radius:5px;padding:4px 8px}
+.guideStar{position:absolute;right:25px;top:21px;font-size:28px;color:#8d98a8}
+.guideHead{display:flex;align-items:center;gap:14px;padding:0 16px;background:#111820;border-bottom:1px solid #2b3544}
+.guideHead b{font-size:16px}.guideHead span{font-size:12px;color:#8e9aab}.guideHead button{margin-left:auto}
+.guideBody{overflow:auto;background:#080c11;position:relative}
+.gtable{min-width:1320px}
+.ghead{position:sticky;top:0;z-index:7;display:grid;grid-template-columns:310px 1fr;background:#252b33;height:42px}
+.gcorner{position:sticky;left:0;z-index:9;background:#252b33;padding:11px 14px;color:#86c6ff;font-weight:700;border-right:1px solid #394250;border-bottom:1px solid #394250}
+.gtimes{display:grid;grid-template-columns:repeat(8,180px)}
+.gtime{padding:11px 12px;border-right:1px solid #394250;border-bottom:1px solid #394250;font-size:13px;color:#c5cad2}
+.grow{display:grid;grid-template-columns:310px 1440px;min-height:58px;border-bottom:1px solid #242b34}
+.gchan{position:sticky;left:0;z-index:5;background:#151a20;padding:6px 12px;display:flex;align-items:center;gap:12px;cursor:default;border-right:1px solid #343c47}
+.gchan.selected{background:#242d38}
+.gchan img{width:54px;height:40px;object-fit:contain;flex:0 0 54px}
+.gchan b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gprogs{position:relative;width:1440px;background:repeating-linear-gradient(to right,#0d1116 0,#0d1116 179px,#2a3038 180px)}
+.gprog{position:absolute;top:4px;bottom:4px;background:#151a20;border:1px solid #2b323b;border-radius:3px;padding:7px 9px;overflow:hidden;cursor:pointer}
+.gprog:hover,.gprog.selected{background:#244b70;border-color:#5c9bd0}
+.gprog.now{background:#1c2d3f}.gprog.now.selected{background:#285b86}
+.gprog b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gprog small{display:block;color:#98a3b2;margin-top:4px;font-size:10px}
+.nowLine{position:absolute;top:0;bottom:0;width:2px;background:#68b9ff;z-index:4;pointer-events:none}
+.nowTriangle{position:absolute;top:0;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:8px solid #68b9ff;transform:translateX(-6px);z-index:8}
+
+
+
+:root{
+  --guide-accent:#e32636;
+  --guide-accent-soft:rgba(227,38,54,.28);
+  --guide-accent-line:rgba(227,38,54,.58);
+  --guide-black:#080808;
+  --guide-panel:#111111;
+  --guide-panel2:#1a1a1a;
+}
+.guideLayer{background:var(--guide-black)!important}
+.guidePreview{background:#080808!important;border-bottom-color:#2b0e12!important}
+.guideHead{background:#12090a!important;border-bottom-color:#40151a!important}
+.ghead,.gcorner{background:#1b0c0e!important}
+.gcorner{color:var(--guide-accent)!important;border-color:#432027!important}
+.gtime{border-color:#432027!important}
+.grow{border-bottom-color:#281215!important}
+.gchan{background:#100d0e!important;border-right-color:#3a181d!important}
+.gchan.selected{background:#261014!important}
+.gprogs{background:repeating-linear-gradient(to right,#0d0a0b 0,#0d0a0b 179px,#321419 180px)!important}
+.gprog{background:#171113!important;border-color:#382026!important}
+.gprog:hover,.gprog.selected{background:var(--guide-accent-soft)!important;border-color:var(--guide-accent)!important}
+.gprog.now{background:#241316!important}
+.gprog.now.selected{background:var(--guide-accent-soft)!important}
+.guideInfoChannel{color:var(--guide-accent)!important}
+.nowLine{width:1px!important;background:var(--guide-accent-line)!important}
+.nowTriangle{border-top-color:var(--guide-accent)!important}
+.guideThemePicker{display:flex;align-items:center;gap:8px;margin-left:12px;font-size:12px;color:#aeb5c0}
+.guideThemePicker input{width:30px;height:24px;border:0;background:transparent;padding:0;cursor:pointer}
+
+
+/* V3 stable guide preview: NEVER move/detach the live video element. */
+body.guideOpen .stage{
+  position:fixed!important;
+  left:0!important;
+  top:0!important;
+  width:576px!important;
+  height:324px!important;
+  z-index:86!important;
+  display:block!important;
+  background:#000!important;
+}
+body.guideOpen .stage .videoWrap{
+  height:324px!important;
+  min-height:324px!important;
+  border-radius:0!important;
+}
+body.guideOpen .stage .now{display:none!important}
+body.guideOpen .stage video{width:100%!important;height:100%!important;object-fit:contain!important}
+body.guideOpen #guideVideoBox{background:#000}
+
+
+/* ===== JOSH IPTV V5: GUIDE-FIRST HOME ===== */
+.v5GuideToolbar{
+ display:flex;align-items:center;gap:8px;padding:9px 12px;background:#090909;
+ border-bottom:1px solid #292929;white-space:nowrap;overflow-x:auto;overflow-y:hidden;
+}
+.v5CategoryFilters{display:flex;gap:8px}
+.v5GuideFilter{
+ border:1px solid #373737;background:#171717;color:#d7d7d7;border-radius:18px;
+ padding:7px 12px;font-size:11px;font-weight:850;letter-spacing:.2px;cursor:pointer;white-space:nowrap;
+}
+.v5GuideFilter:hover{border-color:var(--guide-accent);color:#fff}
+.v5GuideFilter.active{background:var(--guide-accent);border-color:var(--guide-accent);color:#fff}
+.v5GuideSearch{
+ margin-left:auto;min-width:240px;width:240px;background:#151515;border:1px solid #3b3b3b;
+ color:#fff;border-radius:18px;padding:7px 13px;outline:none;
+}
+.v5GuideSearch:focus{border-color:var(--guide-accent)}
+.v5ExitGuide{
+ margin-top:12px;border:0;border-radius:7px;background:var(--guide-accent);color:#fff;
+ font-weight:900;padding:9px 16px;cursor:pointer;letter-spacing:.2px;
+}
+.v5ExitGuide:hover{filter:brightness(1.12)}
+
+
+/* ===== JOSH IPTV V6 ===== */
+/* No legacy category/channel-screen flash during startup. */
+html.v6Booting body{visibility:hidden}
+body.v6Live .sidebar,
+body.v6Live .channelPane{display:none!important}
+body.v6Live .main{grid-template-columns:1fr!important}
+body.v6Live .stage{width:100%!important;max-width:none!important}
+
+/* Traditional black/white guide is the V6 default. */
+:root{
+ --guide-accent:#ffffff;
+ --guide-accent-soft:rgba(255,255,255,.16);
+ --guide-accent-line:rgba(255,255,255,.72);
+ --guide-black:#050505;
+ --guide-panel:#101010;
+ --guide-panel2:#191919;
+}
+.guideLayer,.guideHead,.guideBody,.guideTop,.guideGrid,.guideTimeline{background:#050505!important;color:#fff!important}
+.guideProgram{background:#181818!important;border-color:#363636!important;color:#fff!important;font-size:15px!important}
+.guideProgram:hover{background:#292929!important;border-color:#fff!important}
+.guideChannel{background:#0c0c0c!important;color:#fff!important;font-size:15px!important}
+.guideChannelName{font-size:15px!important;font-weight:800!important}
+.guideTime{font-size:14px!important;font-weight:800!important;color:#fff!important}
+.guideInfoTitle{font-size:25px!important;line-height:1.15!important}
+.guideInfoMeta,.guideInfoChannel{font-size:14px!important}
+.guideInfoDesc{font-size:15px!important;line-height:1.4!important;color:#e4e4e4!important}
+.guideHead{font-size:15px!important}
+
+/* Larger, easier category targets. */
+.v5GuideToolbar{gap:11px!important;padding:12px 14px!important;min-height:54px!important}
+.v5CategoryFilters{gap:11px!important}
+.v5GuideFilter{
+ font-size:14px!important;
+ padding:10px 17px!important;
+ min-height:40px!important;
+ border-radius:8px!important;
+ border:1px solid #555!important;
+ background:#111!important;
+ color:#fff!important;
+}
+.v5GuideFilter:hover{background:#242424!important;border-color:#fff!important}
+.v5GuideFilter.active{background:#fff!important;border-color:#fff!important;color:#000!important}
+.v5GuideSearch{
+ min-width:280px!important;width:280px!important;
+ font-size:14px!important;padding:10px 15px!important;
+ border-radius:8px!important;background:#111!important;color:#fff!important;border-color:#555!important;
+}
+.v5ExitGuide{
+ background:#fff!important;color:#000!important;
+ font-size:14px!important;padding:11px 18px!important;
+}
+
+
+/* ===== JOSH IPTV V7 ===== */
+.v5GuideToolbar{gap:7px!important;padding:8px 10px!important;min-height:44px!important;overflow-x:auto!important}
+.v5CategoryFilters{gap:7px!important}
+.v5GuideFilter{font-size:12px!important;padding:7px 11px!important;min-height:32px!important;border-radius:7px!important}
+.v5GuideSearch{position:sticky!important;right:0!important;z-index:4!important;min-width:190px!important;width:190px!important;font-size:12px!important;padding:7px 10px!important;border-radius:7px!important;box-shadow:-12px 0 12px #090909!important}
+body.v7Live #groups,body.v7Live #channels,body.v7Live .top,body.v7Live .now{display:none!important}
+body.v7Live #app,body.v7Live .layout{display:block!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important}
+body.v7Live .stage{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:200!important;background:#000!important}
+body.v7Live .videoWrap{height:100vh!important;min-height:100vh!important;border-radius:0!important}
+body.v7Live video{width:100%!important;height:100%!important;object-fit:contain!important;background:#000!important}
+.v7SoundPrompt{display:none;position:absolute;inset:0;z-index:95;align-items:center;justify-content:center;background:rgba(0,0,0,.20);cursor:pointer}
+.v7SoundPrompt span{background:rgba(0,0,0,.82);border:1px solid #aaa;color:#fff;border-radius:8px;padding:10px 14px;font-size:14px;font-weight:900}
+body.v7NeedsSound.guideOpen .v7SoundPrompt{display:flex}
+.v7LiveControls{display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:240;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;background:rgba(0,0,0,.76);border:1px solid rgba(255,255,255,.24)}
+body.v7Live .v7LiveControls{display:flex}
+.v7LiveControls [hidden]{display:none!important}
+.v7Control{border:1px solid #666;background:#151515;color:#fff;border-radius:7px;padding:9px 13px;font-size:13px;font-weight:850;cursor:pointer}
+.v7Control:hover:not(:disabled){background:#292929;border-color:#fff}.v7Control:disabled{opacity:.38;cursor:not-allowed}
+.v7LiveBtn.behind{background:#fff;color:#000;border-color:#fff}.v7Behind{min-width:52px;text-align:center;color:#ddd;font-size:12px;font-weight:800}
+
+
+/* ===== V8: CLEAN CABLE-GUIDE LAYOUT ===== */
+.guideLayer{grid-template-rows:324px 48px 56px minmax(0,1fr)!important}
+.guidePreview{background:#090a11!important;border-bottom:1px solid #2b2c37!important}
+.guideHead{background:#11121b!important;border-bottom:1px solid #323340!important}
+.guideBody{background:#0c0d16!important;overflow:auto!important;min-height:0!important;overscroll-behavior:contain}
+.gtable{width:max-content!important;min-width:100%!important}
+.ghead{display:grid!important;grid-template-columns:270px var(--v8-grid-width,2160px)!important;width:max-content!important;height:49px!important;position:sticky!important;top:0!important;z-index:15!important;background:#171825!important}
+.gcorner{position:sticky!important;left:0!important;z-index:18!important;background:#202131!important;color:#fff!important;border-right:1px solid #444554!important;padding:13px 14px!important;font-size:13px!important;white-space:nowrap!important}
+.gtimes{display:flex!important;width:var(--v8-grid-width,2160px)!important;height:49px!important}
+.gtime{flex:0 0 180px!important;width:180px!important;padding:14px 12px!important;color:#d6d7e1!important;font-size:14px!important;background:#171825!important;border-right:1px solid #353644!important;white-space:nowrap!important}
+.grow{display:grid!important;grid-template-columns:270px var(--v8-grid-width,2160px)!important;width:max-content!important;height:66px!important;min-height:66px!important;border-bottom:1px solid #292a38!important}
+.gchan{position:sticky!important;left:0!important;z-index:10!important;min-width:0!important;width:270px!important;height:66px!important;display:flex!important;align-items:center!important;gap:11px!important;padding:8px 13px!important;background:#171825!important;border-right:1px solid #444554!important}
+.gchan.selected{background:#252638!important}
+.gchan img{flex:0 0 54px!important;width:54px!important;height:43px!important;object-fit:contain!important}
+.gchan b{display:block!important;min-width:0!important;font-size:14px!important;line-height:1.25!important;font-weight:750!important;white-space:normal!important;overflow:hidden!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important}
+.gprogs{position:relative!important;width:var(--v8-grid-width,2160px)!important;height:66px!important;background:repeating-linear-gradient(to right,#10111b 0px,#10111b 179px,#30313f 179px,#30313f 180px)!important}
+.gprog{position:absolute!important;top:4px!important;bottom:4px!important;min-width:0!important;max-width:none!important;border:1px solid #343544!important;border-radius:2px!important;padding:10px 11px!important;background:#1a1b2a!important;color:#f0f0f5!important;overflow:hidden!important;white-space:nowrap!important;cursor:pointer!important}
+.gprog.now{background:#242637!important}
+.gprog:hover,.gprog.selected{background:#33374b!important;border-color:#e2e2eb!important}
+.gprog b{display:block!important;font-size:14px!important;font-weight:650!important;line-height:19px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.gprog small{display:none!important}
+.nowLine{z-index:7!important;background:rgba(255,255,255,.55)!important}
+.nowTriangle{z-index:16!important;border-top-color:#fff!important}
+.v5GuideToolbar{gap:8px!important;padding:8px 12px!important;overflow-x:auto!important;scrollbar-width:thin!important}
+.v5CategoryFilters{gap:8px!important}
+.v5GuideFilter{font-size:12px!important;min-height:34px!important;padding:7px 12px!important}
+.v5GuideSearch{flex:0 0 190px!important;min-width:190px!important;max-width:190px!important;width:190px!important;position:sticky!important;right:0!important}
+.v8GuideNav{margin-left:auto!important;display:flex!important;gap:6px!important;align-items:center!important}
+.v8GuideNav button{border:1px solid #484a5c!important;background:#222432!important;color:#fff!important;border-radius:6px!important;padding:7px 11px!important;font-size:12px!important;font-weight:750!important;cursor:pointer!important}
+.v8GuideNav button:hover{background:#3b3d51!important}
+.v8GuideNav button:disabled{opacity:.35!important;cursor:default!important}
+body.v7Live .stage{cursor:pointer!important}
+body.v7Live .stage .videoWrap{cursor:pointer!important}
+body.v7Live video{pointer-events:none!important}
+body.v7Live .v7LiveControls{pointer-events:auto!important}
+
+
+/* V10: unobtrusive mouse-activated live playback controls. */
+body.v7Live .v7LiveControls{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transition:opacity .22s ease,visibility .22s ease!important;
+}
+body.v7Live.v10ControlsVisible .v7LiveControls{
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+body.v7Live .v7LiveControls:hover{
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+/* V12: constrain the existing live video to the 576 x 324 guide preview. */
+body.guideOpen .stage{
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+body.guideOpen .stage .videoWrap{
+  position:relative!important;
+  display:block!important;
+  overflow:hidden!important;
+  width:100%!important;
+  max-width:100%!important;
+  height:324px!important;
+  max-height:324px!important;
+}
+body.guideOpen .stage #video{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  object-fit:contain!important;
+}
+
+/* Mac windowed-mode fix: size live playback to the visible browser viewport,
+   not the Mac screen or a stale 100vh layout. Guide sizing stays unchanged. */
+body.v7Live .stage{
+  position:fixed!important;
+  top:0!important;right:0!important;bottom:0!important;left:0!important;
+  inset:0!important;
+  width:100%!important;width:100dvw!important;
+  height:100%!important;height:100dvh!important;
+  max-height:100dvh!important;
+  overflow:hidden!important;
+}
+body.v7Live .stage .videoWrap{
+  position:relative!important;
+  width:100%!important;
+  height:100%!important;height:100dvh!important;
+  min-height:0!important;max-height:100dvh!important;
+  overflow:hidden!important;
+}
+body.v7Live .stage #video{
+  position:absolute!important;inset:0!important;
+  width:100%!important;height:100%!important;
+  max-width:100%!important;max-height:100%!important;
+  object-fit:contain!important;
+}
+body.v7Live .v7LiveControls{bottom:max(16px,env(safe-area-inset-bottom))!important}
+
+
+/* V15 fullscreen controls and independent multiview */
+.v7LiveControls.v15Controls{width:min(850px,calc(100vw - 28px));box-sizing:border-box;flex-direction:column;align-items:stretch;gap:9px;padding:14px 17px;border-radius:13px;background:rgba(8,12,19,.91);backdrop-filter:blur(14px)}
+.v15Top,.v15Buttons{display:flex;align-items:center;justify-content:space-between;gap:12px}.v15Top{font-size:13px}.v15Title{font-weight:750;font-size:15px}.v15Sub{font-size:12px;color:#b7c1d2;margin-top:3px}.v15Progress{height:4px;background:#424b5a;border-radius:9px;overflow:hidden}.v15Progress>div{height:100%;width:0;background:#dce8ff;transition:width 1s linear}.v15Buttons>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.v15Controls button,.v15MV button{background:#252e3e;color:#fff;border:1px solid #536074;border-radius:7px;padding:9px 12px;cursor:pointer;font-weight:650}.v15Controls button:hover,.v15MV button:hover{background:#384b66}.v15Controls input[type=range]{width:100px;accent-color:#dce8ff}.v15LiveTag{color:#ff8f8f;font-weight:800;letter-spacing:.06em;font-size:11px}
+.v15MV{position:fixed;inset:0;z-index:400;background:#090d15;color:#f3f6ff;display:none;flex-direction:column;padding:14px;box-sizing:border-box;font-family:inherit}.v15MV.open{display:flex}.v15MVHead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}.v15MVHead strong{font-size:19px;margin-right:auto}.v15MVHead select,.v15MVSearch{background:#192333;color:#fff;border:1px solid #4c5b70;padding:9px;border-radius:7px}.v15MVGrid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:9px}.v15MVGrid.two{grid-template-rows:1fr;grid-template-columns:repeat(2,minmax(0,1fr))}.v15MVGrid.three{grid-template-rows:repeat(2,minmax(0,1fr))}.v15MVTile{position:relative;background:#000;border:2px solid #28354a;border-radius:9px;overflow:hidden;min-height:0;display:flex;align-items:center;justify-content:center}.v15MVTile.audio{border-color:#6da6ff}.v15MVTile video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.v15MVEmpty{z-index:2}.v15MVTileBar{position:absolute;bottom:0;left:0;right:0;z-index:3;background:linear-gradient(transparent,rgba(0,0,0,.94));display:flex;align-items:center;gap:7px;padding:22px 9px 8px}.v15MVTileBar span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700}.v15MVTileBar button{padding:6px 8px;font-size:12px}.v15MVFoot{color:#9eaec5;font-size:12px;margin-top:8px}.v15MVPicker{position:absolute;inset:0;z-index:8;background:#101827;display:none;flex-direction:column;padding:12px;gap:8px}.v15MVPicker.open{display:flex}.v15MVChoices{overflow:auto;flex:1}.v15MVChoices button{display:block;text-align:left;width:100%;margin:2px 0}.v15MVChoices small{display:block;color:#a5b5ca}.v15MVTile.threeLast{grid-column:1 / -1;max-width:70%;width:100%;justify-self:center}
+@media(max-width:680px){.v15MVGrid,.v15MVGrid.two{grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(0,1fr))}.v15MVGrid.two{grid-template-rows:repeat(2,minmax(0,1fr))}.v15MVTile.threeLast{max-width:100%}.v15MVHead{gap:5px}.v15MVHead strong{font-size:14px}.v15MVHead button{padding:6px}}
+
+/* V16 playlist status and focused multiview */
+.v16Settings{position:fixed;right:18px;top:70px;z-index:550;width:min(390px,calc(100vw - 36px));background:#121b29;border:1px solid #4c5c73;border-radius:12px;padding:17px;color:#f4f7ff;box-shadow:0 14px 45px #000a;display:none}.v16Settings.open{display:block}.v16Settings h3{margin:0 0 12px;font-size:17px}.v16Settings p{font-size:12px;color:#aebbd0;line-height:1.5}.v16Settings button{background:#2c3d56;color:white;border:1px solid #64758d;border-radius:7px;padding:9px 11px;cursor:pointer}.v16Settings .v16Row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px}.v16Settings #v16PlaylistStatus{font-size:13px;line-height:1.5}.v15MV.focused .v15MVGrid{display:block;position:relative}.v15MV.focused .v15MVTile{display:none}.v15MV.focused .v15MVTile.v16FocusedTile{display:flex;width:100%;height:100%;max-width:none;grid-column:auto}.v15MV:fullscreen{padding:12px;background:#05080e}.v15MV:fullscreen .v15MVGrid{flex:1}.v15MV:fullscreen .v15MVHead{margin-bottom:8px}.v15MV:fullscreen .v15MVFoot{margin-top:5px}.v15MV .v16FocusBack{display:none}.v15MV.focused .v16FocusBack{display:inline-block}
+
+.v16GuideSettingsBtn{flex:0 0 auto;background:#252b37;color:#fff;border:1px solid #677080;border-radius:7px;padding:9px 13px;font-weight:800;cursor:pointer}.v16GuideSettingsBtn:hover{background:#3a4353}.v16Settings{top:clamp(65px,45vh,390px);right:16px;max-height:calc(100dvh - 90px);overflow:auto}
+/* V16 favorites: separate button; channel name remains non-clickable */
+.gchan .v16FavStar{margin-left:auto;flex:0 0 30px;border:1px solid #505568;border-radius:6px;background:#202332;color:#9da6b8;font-size:22px;line-height:28px;height:32px;cursor:pointer;padding:0;text-align:center}
+.gchan .v16FavStar.on{color:#ffd166;border-color:#aa873e;background:#392f1b}
+.gchan .v16FavStar:hover{color:#fff;border-color:#d7dce7}
+/* Mini-player audio toggle stays visible over the guide preview. */
+body.guideOpen #v16PreviewSound{display:block!important}
+#v16PreviewSound{display:none;position:absolute;top:12px;right:12px;z-index:95;background:rgba(8,12,20,.88);border:1px solid #8c9bad;color:#fff;border-radius:7px;padding:9px 12px;font-size:12px;font-weight:800;cursor:pointer}
+#v16PreviewSound:hover{background:#30405b}
+
+/* JOSH IPTV MOBILE V2 — independent phone-first presentation. */
+@media(max-width:760px){
+ html,body{height:100%;height:100dvh;overflow:hidden!important;-webkit-text-size-adjust:100%;}
+ button,input,select{touch-action:manipulation}button{min-height:38px}
+ .guideLayer{grid-template-rows: min(57vw,230px) 48px 52px minmax(0,1fr)!important;height:100dvh!important;overflow:hidden!important;}
+ .guidePreview{display:block!important;position:relative!important;min-height:0!important;overflow:hidden!important;}
+ .guideVideoBox{display:none!important}
+ .guideInfo{position:absolute!important;inset:0!important;padding:9px 12px!important;pointer-events:none!important;background:linear-gradient(90deg,transparent 0%,transparent 57%,rgba(0,0,0,.85) 100%)!important;}
+ .guideInfoTitle{font-size:13px!important;position:absolute;left:60%;right:8px;top:9px;white-space:normal!important;max-height:44px;overflow:hidden;padding-right:0!important;}
+ .guideInfoMeta,.guideInfoDesc,.guideInfoChannel,.streamSpecs,.guideStar{display:none!important}
+ .v5ExitGuide{position:absolute!important;right:9px;bottom:9px;margin:0!important;font-size:11px!important;padding:8px!important;pointer-events:auto!important;}
+ body.guideOpen .stage{top:0!important;left:0!important;width:100vw!important;height:min(57vw,230px)!important;z-index:85!important;overflow:hidden!important;}
+ body.guideOpen .stage .videoWrap{height:100%!important;min-height:0!important;max-height:100%!important;}
+ body.guideOpen .stage #video{width:100%!important;height:100%!important;object-fit:contain!important;}
+ body.guideOpen #v16PreviewSound{top:auto!important;bottom:10px!important;left:10px!important;right:auto!important;font-size:11px!important;padding:8px 9px!important;z-index:96!important;}
+ .guideHead{padding:0 8px!important;gap:5px!important;overflow:hidden!important;}
+ .guideHead b{font-size:12px!important;white-space:nowrap}.guideHead #guideRange,.guideThemePicker{display:none!important}
+ .v8GuideNav{gap:3px!important;margin-left:auto!important}.v8GuideNav button{padding:7px 6px!important;font-size:10px!important;min-height:34px!important;}
+ .v16GuideSettingsBtn{padding:7px 6px!important;font-size:10px!important;min-height:34px!important;}
+ .v5GuideToolbar{padding:7px 8px!important;min-height:52px!important;gap:7px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important;}
+ .v5GuideToolbar::-webkit-scrollbar{display:none}.v5CategoryFilters{gap:6px!important}.v5GuideFilter{font-size:11px!important;padding:7px 10px!important;min-height:35px!important;white-space:nowrap!important;}
+ .v5GuideSearch{position:relative!important;min-width:145px!important;max-width:145px!important;flex:0 0 145px!important;right:auto!important;font-size:12px!important;box-shadow:none!important;}
+ .guideBody{min-height:0!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;}
+ .ghead{grid-template-columns:135px var(--v8-grid-width,2160px)!important;height:42px!important;}
+ .gcorner{padding:11px 6px!important;font-size:11px!important;}.gtimes,.gtime{height:42px!important}.gtime{font-size:11px!important;padding:12px 8px!important;}
+ .grow{grid-template-columns:135px var(--v8-grid-width,2160px)!important;height:64px!important;min-height:64px!important;}
+ .gchan{width:135px!important;height:64px!important;gap:4px!important;padding:5px 4px!important;}
+ .gchan img{width:34px!important;flex:0 0 34px!important;height:32px!important;}.gchan b{font-size:10px!important;line-height:1.15!important;}
+ .gchan .v16FavStar{flex:0 0 22px!important;width:22px!important;height:27px!important;line-height:24px!important;font-size:17px!important;margin-left:0!important;}
+ .gprogs{height:64px!important}.gprog{padding:9px 8px!important;}.gprog b{font-size:12px!important;}
+ .v16Settings{position:fixed!important;top:auto!important;bottom:calc(12px + env(safe-area-inset-bottom))!important;right:8px!important;left:8px!important;width:auto!important;max-height:75dvh!important;z-index:550!important;}
+ body.v7Live .stage,body.v7Live .videoWrap{height:100dvh!important;max-height:100dvh!important;}
+ body.v7Live .v7LiveControls{bottom:calc(10px + env(safe-area-inset-bottom))!important;width:calc(100vw - 16px)!important;padding:9px!important;gap:6px!important;}
+ .v15Top,.v15Buttons{gap:5px!important;flex-wrap:wrap!important}.v15Title{font-size:12px!important}.v15Sub{font-size:10px!important}
+ .v15Controls button{padding:7px!important;font-size:11px!important}.v15Controls input[type=range]{width:65px!important}
+ .v15MV{padding:8px!important;padding-top:calc(8px + env(safe-area-inset-top))!important;}.v15MVHead button,.v15MVHead select{font-size:11px!important;padding:6px!important;}
+ #setup{height:100dvh!important;padding:12px!important}.card{padding:19px!important}.brand{font-size:24px!important}.urlrow{flex-wrap:wrap!important}.urlrow input{min-width:100%!important}
+}
+@media(max-width:760px) and (orientation:landscape){
+ .guideLayer{grid-template-rows:0px 43px 47px minmax(0,1fr)!important;}
+ .guidePreview{display:none!important}body.guideOpen .stage{visibility:hidden!important;pointer-events:none!important;}
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .guideLayer{grid-template-rows:min(48vh,240px) 42px 44px minmax(0,1fr)!important}
+  body.guideOpen .stage{width:min(43vw,426px)!important;height:min(48vh,240px)!important}
+  body.guideOpen .stage .videoWrap{height:100%!important;min-height:0!important;max-height:100%!important}
+  .guidePreview{grid-template-columns:min(43vw,426px) minmax(0,1fr)!important}
+  .guideInfo{padding:10px 14px!important}
+  .guideInfoTitle{font-size:16px!important}
+  .guideInfoDesc{font-size:11px!important;max-height:42px;overflow:hidden}
+  .v5GuideToolbar{min-height:44px!important}
+}
+</style>
+</head><body>
+<section id="setup"><div class="card"><div class="brand">JOSH IPTV <span style="font-size:13px;color:#8d98aa">MOBILE V1</span></div><div class="sub">Paste a playlist URL or load an M3U file. That's it.</div><div class="urlrow"><input id="url" placeholder="Paste Dropbox/raw M3U URL"><button class="primary" id="loadUrl">LOAD</button></div><div class="or">OR</div><button class="secondary" id="choose">CHOOSE M3U FILE</button><input id="file" type="file" accept=".m3u,.m3u8,text/plain,application/x-mpegURL,audio/mpegurl" class="hidden"><div id="setupError" class="error"></div><div class="hint">Direct URL loading depends on the host allowing browser access. If Dropbox or another host blocks it, choose the M3U file directly. Josh IPTV remembers your favorites and last channel in this browser.</div></div></section>
+<section id="app" class="hidden"><header class="top"><div class="brand">JOSH IPTV</div><select id="mobileGroups" class="mobileGroups"></select><span id="status" class="status"></span><input id="search" class="search" placeholder="Search channels"><button id="guideBtn" class="secondary small">GUIDE</button><button id="v16SettingsBtn" class="secondary small">⚙ SETTINGS</button><button id="reload" class="secondary small">Playlist</button></header><main class="layout"><aside id="groups" class="groups"></aside><section id="channels" class="channels"></section><section class="stage"><div class="videoWrap"><video id="video" autoplay playsinline></video><button type="button" id="v16PreviewSound" title="Toggle mini-player sound">🔊 UNMUTE</button><div id="v7SoundPrompt" class="v7SoundPrompt"><span>🔊 CLICK FOR SOUND</span></div><div id="empty" class="empty"><b>Select a channel</b><br><span style="font-size:12px">Your stream will play here</span></div></div><div class="now"><img id="nowLogo"><div style="min-width:0;flex:1"><div id="nowName" class="nowName">No channel selected</div><div id="nowProgram" class="nowProgram"></div></div><span id="nowGroup" class="badge"></span></div></section></main></section>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.13/dist/hls.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.8.0/dist/mpegts.min.js"></script>
+<script>
+// Persistent local cache: load playlist/EPG once, then Chrome remembers them.
+const JoshCache=(()=>{
+ const DB='JoshIPTV_V11_Cache', STORE='data';
+ function db(){
+   return new Promise((resolve,reject)=>{
+     const q=indexedDB.open(DB,1);
+     q.onupgradeneeded=()=>{ if(!q.result.objectStoreNames.contains(STORE))q.result.createObjectStore(STORE) };
+     q.onsuccess=()=>resolve(q.result); q.onerror=()=>reject(q.error);
+   });
+ }
+ async function get(k){
+   try{
+     const d=await db();
+     return await new Promise((resolve,reject)=>{
+       const q=d.transaction(STORE,'readonly').objectStore(STORE).get(k);
+       q.onsuccess=()=>resolve(q.result||null); q.onerror=()=>reject(q.error);
+     });
+   }catch(e){return null}
+ }
+ async function set(k,v){
+   try{
+     const d=await db();
+     await new Promise((resolve,reject)=>{
+       const q=d.transaction(STORE,'readwrite').objectStore(STORE).put(v,k);
+       q.onsuccess=()=>resolve(); q.onerror=()=>reject(q.error);
+     });
+     return true;
+   }catch(e){return false}
+ }
+ return {get,set};
+})();
+
+const JOSH_PLAYLIST_URL='';
+const JOSH_EPG_URL='https://raw.githubusercontent.com/joshmradio/josh-epg/main/guide.xml.gz';
+
+const $=s=>document.querySelector(s), state={channels:[],group:'ALL CHANNELS',query:'',active:null}; let hls=null, mts=null;
+const favs=new Set(JSON.parse(localStorage.getItem('joshiptv:favs')||'[]')); const saveFavs=()=>localStorage.setItem('joshiptv:favs',JSON.stringify([...favs]));
+function parseM3U(text){let p=null,out=[];for(const raw of text.split(/\r?\n/)){const line=raw.trim();if(!line)continue;if(line.startsWith('#EXTINF:')){const attr=k=>{const m=line.match(new RegExp(k+'="([^"]*)"','i'));return m?m[1]:''};p={name:(line.match(/,(.*)$/)||[])[1]?.trim()||'Unnamed Channel',group:attr('group-title')||'UNGROUPED',logo:attr('tvg-logo'),id:attr('tvg-id')};}else if(!line.startsWith('#')&&p){out.push({...p,url:line,key:(p.id||p.name)+'|'+line});p=null}}return out}
+
+function loadText(text,label='Playlist'){const c=parseM3U(text); JoshCache.set('playlistText',text);if(!c.length)throw Error('No channels found in that M3U.');state.channels=c;$('#status').textContent=`${label} • ${c.length} channels`;$('#setup').classList.add('hidden');$('#app').classList.remove('hidden');renderGroups();renderChannels();}
+function groups(){const m=new Map();for(const c of state.channels)m.set(c.group,(m.get(c.group)||0)+1);return [['★ FAVORITES',favs.size],['ALL CHANNELS',state.channels.length],...[...m.entries()].sort((a,b)=>a[0].localeCompare(b[0]))]}
+function renderGroups(){const gs=groups();$('#groups').innerHTML=gs.map(([g,n])=>`<div class="g ${state.group===g?'active':''}" data-g="${esc(g)}"><span>${esc(g)}</span><span class="count">${n}</span></div>`).join('');$('#groups').querySelectorAll('.g').forEach(x=>x.onclick=()=>selectGroup(x.dataset.g));$('#mobileGroups').innerHTML=gs.map(([g])=>`<option ${state.group===g?'selected':''}>${esc(g)}</option>`).join('')}
+function selectGroup(g){state.group=g;renderGroups();renderChannels()}
+function filtered(){let a=state.channels;if(state.group==='★ FAVORITES')a=a.filter(c=>favs.has(c.key));else if(state.group!=='ALL CHANNELS')a=a.filter(c=>c.group===state.group);const q=state.query.toLowerCase();if(q)a=a.filter(c=>(c.name+' '+c.group).toLowerCase().includes(q));return a}
+function renderChannels(){const a=filtered();$('#channels').innerHTML=a.length?a.map((c,i)=>`<div class="channel ${state.active?.key===c.key?'active':''}" data-i="${i}"><img class="logo" src="${esc(c.logo)}" onerror="this.style.visibility='hidden'"><div><div class="cname">${esc(c.name)}</div><div class="meta">${esc(c.group)}</div></div><div class="star ${favs.has(c.key)?'on':''}" data-star="${i}">★</div></div>`).join(''):'<div style="padding:25px;color:#778396">No channels found.</div>';$('#channels').querySelectorAll('.channel').forEach(x=>x.onclick=e=>{const c=a[+x.dataset.i];if(e.target.dataset.star!==undefined){toggleFav(c);e.stopPropagation()}else play(c)})}
+function toggleFav(c){favs.has(c.key)?favs.delete(c.key):favs.add(c.key);saveFavs();renderGroups();renderChannels()}
+function proxyUrl(u){return '/api/proxy?url='+encodeURIComponent(u)}
+function cleanupPlayer(){const v=$('#video');try{v.pause()}catch(e){};if(hls){try{hls.destroy()}catch(e){}hls=null}if(mts){try{mts.destroy()}catch(e){}mts=null}v.removeAttribute('src');v.load()}
+let hlsPlayer=null;
+let tsPlayer=null;
+
+function destroyPlayback(){
+  const v=$('#video');
+  try{ if(hlsPlayer){ hlsPlayer.destroy(); hlsPlayer=null; } }catch(e){}
+  try{ if(tsPlayer){ tsPlayer.pause(); tsPlayer.unload(); tsPlayer.detachMediaElement(); tsPlayer.destroy(); tsPlayer=null; } }catch(e){}
+  try{ v.pause(); }catch(e){}
+  v.removeAttribute('src');
+  v.load();
+}
+function setPlaybackStatus(msg){ $('#status').textContent=msg; }
+
+// Display actual decoded video dimensions; audio layout only when reported by the stream parser.
+let streamAudioChannels=null;
+function updateStreamSpecs(){
+  const host=$('#streamSpecs'),v=$('#video');if(!host||!v)return;
+  const height=v.videoHeight||0,width=v.videoWidth||0;
+  let video='Video: Waiting';
+  if(height){
+    const res=height>=2000?'4K UHD':height>=1000?'1080p Full HD':height>=700?'720p HD':height>=460?'480p SD':`${height}p`;
+    video=`${res} (${width}×${height})`;
+  }
+  const audio=streamAudioChannels>=6?'5.1 Surround':streamAudioChannels===2?'Stereo':streamAudioChannels===1?'Mono':'Audio: Unknown';
+  host.replaceChildren();
+  for(const value of [video,audio]){const el=document.createElement('span');el.className='streamSpec';el.textContent=value;host.appendChild(el)}
+}
+
+
+function playNative(url,c){
+  const v=$('#video');
+  v.src=url;
+  v.play().then(()=>setPlaybackStatus(`Playing • ${c.name}`))
+   .catch(()=>setPlaybackStatus(`Native playback failed for ${c.name}. The stream may be blocked by browser security or use an unsupported codec.`));
+}
+
+function play(c){
+  state.active=c;
+  localStorage.setItem('joshiptv:last',c.key);
+  $('#empty').classList.add('hidden');
+  $('#nowName').textContent=c.name;
+  $('#nowGroup').textContent=c.group;
+  $('#nowLogo').src=c.logo||'';
+  renderChannels();
+  setTimeout(updateNowProgram,0);
+
+  v13PausedSinceTune=false;
+  destroyPlayback();
+  streamAudioChannels=null;updateStreamSpecs();
+  const v=$('#video');
+  const url=c.url;
+  const clean=url.split('?')[0].toLowerCase();
+  const looksHls=clean.endsWith('.m3u8') || /\.m3u8(?:\?|$)/i.test(url);
+  const looksTs=clean.endsWith('.ts') || /\/live\/[^/]+\/[^/]+\/\d+(?:\.ts)?(?:\?|$)/i.test(url);
+
+  setPlaybackStatus(`Loading • ${c.name}`);
+
+  if(looksHls && v.canPlayType('application/vnd.apple.mpegurl')){
+    playNative(url,c); return;
+  }
+
+  if(looksHls && window.Hls && Hls.isSupported()){
+    hlsPlayer=new Hls({enableWorker:true,backBufferLength:30,maxBufferLength:30});
+    hlsPlayer.loadSource(url);
+    hlsPlayer.attachMedia(v);
+    hlsPlayer.on(Hls.Events.MANIFEST_PARSED,()=>{
+      v.play().then(()=>setPlaybackStatus(`Playing HLS • ${c.name}`))
+       .catch(()=>setPlaybackStatus(`Loaded ${c.name}. Click the video to start.`));
+    });
+    hlsPlayer.on(Hls.Events.ERROR,(event,data)=>{
+      if(data && data.fatal) setPlaybackStatus(`HLS failed for ${c.name}. Likely CORS/security or an unsupported codec.`);
+    });
+    return;
+  }
+
+  if((looksTs || !looksHls) && window.mpegts && mpegts.isSupported()){
+    try{
+      tsPlayer=mpegts.createPlayer({type:'mpegts',isLive:true,url:url,cors:true,withCredentials:false},
+        {enableWorker:true,enableStashBuffer:false,stashInitialSize:128});
+      tsPlayer.on(mpegts.Events.MEDIA_INFO,info=>{
+        if(state.active?.key!==c.key)return;
+        const count=Number(info?.audioChannelCount);
+        if(Number.isFinite(count)&&count>0){streamAudioChannels=count;updateStreamSpecs()}
+      });
+      tsPlayer.attachMediaElement(v);
+      tsPlayer.load();
+      tsPlayer.play();
+      setPlaybackStatus(`Loading MPEG-TS • ${c.name}`);
+      tsPlayer.on(mpegts.Events.ERROR,()=>{
+        setPlaybackStatus(`MPEG-TS failed for ${c.name}. Likely browser CORS/security or an unsupported codec.`);
+      });
+      v.addEventListener('playing',()=>setPlaybackStatus(`Playing MPEG-TS • ${c.name}`),{once:true});
+      return;
+    }catch(e){}
+  }
+
+  playNative(url,c);
+}
+function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+
+
+$('#choose').onclick=()=>$('#file').click();$('#file').onchange=async e=>{try{const f=e.target.files[0];if(f)loadText(await f.text(),f.name)}catch(err){$('#setupError').textContent=err.message}};
+$('#loadUrl').onclick=async()=>{const u=$('#url').value.trim();if(!u)return;$('#setupError').textContent='Loading…';try{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);loadText(await r.text(),'Remote playlist');localStorage.setItem('joshiptv:url',u);$('#setupError').textContent='';location.reload()}catch(e){$('#setupError').textContent='Could not load that playlist URL directly in Chrome. Use CHOOSE M3U FILE instead.'}};
+$('#search').oninput=e=>{state.query=e.target.value;renderChannels()};$('#mobileGroups').onchange=e=>selectGroup(e.target.value);$('#reload').onclick=()=>{if(confirm('Return to playlist loader?')){$('#app').classList.add('hidden');$('#setup').classList.remove('hidden')}};const saved=localStorage.getItem('joshiptv:url');if(saved)$('#url').value=saved;
+
+
+// ----- Isolated V2 EPG module. Core V1 player functions above remain untouched. -----
+function updateNowProgram(){
+  const el=$('#nowProgram');
+  if(!el)return;
+  if(!state.active){el.textContent='';return}
+  try{
+    const p=(typeof GuideEPG!=='undefined'&&GuideEPG.currentProgram)?GuideEPG.currentProgram(state.active):null;
+    if(!p){el.textContent='Program information unavailable';return}
+    const mins=Math.max(1,Math.ceil((new Date(p.stop)-new Date())/60000));
+    el.textContent=`${p.title} • ${mins} min remaining`;
+  }catch(e){el.textContent=''}
+}
+setInterval(updateNowProgram,15000);
+
+
+let v5GuideFilter='ALL', v5GuideQuery='';
+
+function v5VisibleChannel(c){
+  if(v5GuideFilter==='FAVORITES' && !favs.has(c.key)) return false;
+  if(v5GuideFilter!=='ALL' && v5GuideFilter!=='FAVORITES' && c.group!==v5GuideFilter) return false;
+  const q=v5GuideQuery.trim().toLowerCase();
+  if(!q) return true;
+  const basic=`${c.name||''} ${c.group||''}`.toLowerCase();
+  const epg=(c.id&&GuideEPG&&GuideEPG.searchText)?GuideEPG.searchText(c).toLowerCase():'';
+  return basic.includes(q)||epg.includes(q);
+}
+function v5BuildCategoryFilters(){
+  const host=$('#v5CategoryFilters'); if(!host)return;
+  const groups=[...new Set(state.channels.map(c=>c.group).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  host.innerHTML=groups.map(g=>`<button class="v5GuideFilter" data-filter="${esc(g)}">${esc(g)}</button>`).join('');
+}
+function v5RefreshFilterButtons(){
+  document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===v5GuideFilter));
+}
+
+
+let v7SoundUnlocked=false;
+function v7UnlockSound(){
+ const v=$('#video');if(!v)return;
+ v7SoundUnlocked=true;document.body.classList.remove('v7NeedsSound');
+ v.muted=false;v.volume=1;v.play().catch(()=>{});
+}
+function v7SeekableBounds(){
+ const v=$('#video');if(!v||!v.seekable||!v.seekable.length)return null;
+ try{const i=v.seekable.length-1;return {start:v.seekable.start(i),end:v.seekable.end(i)}}catch(e){return null}
+}
+// Simple live-TV controls: no rewind, lag meter, or automatic seeking.
+let v13PausedSinceTune=false;
+function v7UpdateLiveControls(){
+ const v=$('#video'),pp=$('#v7PausePlay'),go=$('#v7GoLive');
+ if(!v||!pp||!go)return;
+ pp.textContent=v.paused?'▶ PLAY':'⏸ PAUSE';
+ // GO LIVE is an optional recovery action only after the viewer pauses.
+ go.hidden=!v13PausedSinceTune;
+}
+function v7GoLive(){
+ const v=$('#video'),b=v7SeekableBounds();if(!v)return;
+ if(b){try{v.currentTime=Math.max(b.start,b.end-.15)}catch(e){}}
+ v13PausedSinceTune=false;
+ v.play().catch(()=>{});
+ v7UpdateLiveControls();
+}
+function v7EnterLive(){
+$('#guideLayer').classList.add('hidden');document.body.classList.remove('guideOpen','v6Live');document.body.classList.add('v7Live');document.body.classList.add('v10ControlsVisible');v7UpdateLiveControls();
+}
+function v7ReturnToGuide(){if(document.body.classList.contains('v7Live')){document.body.classList.remove('v10ControlsVisible');GuideEPG.showGuide({followActive:true})}}
+
+const GuideEPG=(()=>{
+ const byId=new Map();
+ let loaded=false;
+ let guideStart=null;
+ let selectedProgram=null;
+ let v11FirstClickKey=null; // Persists across guide rerenders, no timeout.
+ let nowTimer=null;
+
+ function dt(s){
+   const m=(s||'').match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})?\s*([+-]\d{4})?/);
+   if(!m)return null;
+   const z=m[7]?m[7].slice(0,3)+':'+m[7].slice(3):'';
+   return new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]||'00'}${z}`);
+ }
+ async function decode(buf,name){
+   const b=new Uint8Array(buf),gz=/\.gz$/i.test(name)||(b[0]===31&&b[1]===139);
+   if(!gz)return new TextDecoder().decode(b);
+   if(!window.DecompressionStream)throw Error('Chrome needs DecompressionStream support for .gz. Use guide.xml instead.');
+   return await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+ }
+ function parse(text){
+   const doc=new DOMParser().parseFromString(text,'application/xml');
+   if(doc.querySelector('parsererror'))throw Error('Invalid XMLTV file');
+   byId.clear();
+   const ps=[...doc.querySelectorAll('programme')];
+   for(const x of ps){
+     const id=x.getAttribute('channel'),start=dt(x.getAttribute('start')),stop=dt(x.getAttribute('stop'));
+     if(!id||!start||!stop)continue;
+     if(!byId.has(id))byId.set(id,[]);
+     byId.get(id).push({
+       start,stop,
+       title:x.querySelector('title')?.textContent?.trim()||'Program',
+       desc:x.querySelector('desc')?.textContent?.trim()||'',
+       category:x.querySelector('category')?.textContent?.trim()||''
+     });
+   }
+   for(const a of byId.values())a.sort((x,y)=>x.start-y.start);
+   loaded=true;
+   JoshCache.set('epgText',text);
+   const matched=state.channels.filter(c=>c.id&&byId.has(c.id)).length;
+   $('#epgStatus').textContent=`EPG loaded: ${ps.length.toLocaleString()} programs • ${matched}/${state.channels.length} channels matched`;
+   $('#status').textContent=`EPG ready • ${matched} channels matched`;
+   setTimeout(updateNowProgram,0);
+ }
+ async function fromFile(f){parse(await decode(await f.arrayBuffer(),f.name))}
+ async function fromUrl(u){
+   const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);
+   parse(await decode(await r.arrayBuffer(),u));
+ }
+ function time(d){return d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}
+ function info(c,p){
+   selectedProgram={c,p};
+   const title=p?.title||c?.name||'TV Guide';
+   $('#guideInfoTitle').textContent=title;
+   $('#guideInfoChannel').textContent=c?`${c.name}  •  ${c.group}`:'';
+   if(!p){
+     $('#guideInfoMeta').textContent='';
+     $('#guideInfoDesc').textContent='No program information available.';
+     return;
+   }
+   const now=new Date();
+   const minsUntil=Math.ceil((p.start-now)/60000);
+   const minsAgo=Math.ceil((now-p.stop)/60000);
+   let status='';
+   if(p.start<=now && p.stop>now){
+     const remaining=Math.max(1,Math.ceil((p.stop-now)/60000));
+     status=`ON NOW  •  ${time(p.start)} – ${time(p.stop)}  •  ${remaining} min remaining`;
+   }else if(p.start>now){
+     let countdown='';
+     if(minsUntil<60) countdown=`in ${minsUntil} min`;
+     else if(minsUntil<1440){
+       const h=Math.floor(minsUntil/60),m=minsUntil%60;
+       countdown=`in ${h} hr${h===1?'':'s'}${m?' '+m+' min':''}`;
+     }else{
+       const d=Math.floor(minsUntil/1440),h=Math.floor((minsUntil%1440)/60);
+       countdown=`in ${d} day${d===1?'':'s'}${h?' '+h+' hr':''}`;
+     }
+     status=`Starts at ${time(p.start)}  •  ${countdown}`;
+   }else{
+     status=`Ended at ${time(p.stop)}${minsAgo<60?'  •  '+minsAgo+' min ago':''}`;
+   }
+   $('#guideInfoMeta').textContent=status;
+   $('#guideInfoDesc').textContent=p.desc||'No description available for this program.';
+ }
+ function currentFor(c){
+   const now=new Date(),a=(c.id&&byId.get(c.id))||[];
+   return a.find(p=>p.start<=now&&p.stop>now)||null;
+ }
+ function moveVideoIntoGuide(){
+   // Keep #video attached to its original player at all times.
+   document.body.classList.add('guideOpen');
+ }
+ function moveVideoHome(){
+   document.body.classList.remove('guideOpen');
+ }
+ function updateNowLine(){
+   if(!guideStart)return;
+   const body=$('#guideBody'),line=$('#guideNowLine'),tri=$('#guideNowTriangle');
+   if(!body||!line||!tri)return;
+   const px=(Date.now()-guideStart.getTime())/60000*V8_PX_PER_MINUTE;
+   const visible=px>=0&&px<=V8_WINDOW_MINUTES*V8_PX_PER_MINUTE;
+   line.style.display=visible?'block':'none';tri.style.display=visible?'block':'none';
+   if(visible){
+     const left=V8_CHANNEL_WIDTH+px;
+     line.style.left=left+'px';line.style.height=Math.max(body.scrollHeight,body.clientHeight)+'px';
+     tri.style.left=left+'px';
+   }
+ }
+ function startNowClock(){
+   if(nowTimer)clearInterval(nowTimer);
+   updateNowLine();
+   // Update every 10 seconds so the line visibly progresses without wasting CPU.
+   nowTimer=setInterval(updateNowLine,10000);
+ }
+ function stopNowClock(){
+   if(nowTimer){clearInterval(nowTimer);nowTimer=null}
+ }
+ let v8WindowStart=null;
+ const V8_WINDOW_MINUTES=360;
+ const V8_PX_PER_MINUTE=6;
+ const V8_CHANNEL_WIDTH=270;
+ function v8RoundHalfHour(date){
+   const d=new Date(date);d.setMinutes(d.getMinutes()<30?0:30,0,0);return d;
+ }
+ function v8Navigate(delta){
+   if(delta===0)v8WindowStart=v8RoundHalfHour(new Date());
+   else v8WindowStart=new Date((v8WindowStart||v8RoundHalfHour(new Date())).getTime()+delta*V8_WINDOW_MINUTES*60000);
+   showGuide();
+ }
+ function showGuide(options={}){
+   document.body.classList.remove('v6Live','v7Live');
+   if(!loaded){$('#epgModal').classList.remove('hidden');return}
+   moveVideoIntoGuide();
+   const list=state.channels.filter(v5VisibleChannel);
+   const now=new Date();
+   if(!v8WindowStart)v8WindowStart=v8RoundHalfHour(now);
+   guideStart=new Date(v8WindowStart);
+   const end=new Date(guideStart.getTime()+V8_WINDOW_MINUTES*60000);
+   const gridWidth=V8_WINDOW_MINUTES*V8_PX_PER_MINUTE;
+   const slots=V8_WINDOW_MINUTES/30;
+   const dayLabel=d=>d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+   $('#guideRange').textContent=`${dayLabel(guideStart)} ${time(guideStart)} – ${dayLabel(end)} ${time(end)}`;
+   const earlier=$('#v8Prev');if(earlier)earlier.disabled=guideStart.getTime()<=v8RoundHalfHour(now).getTime()-V8_WINDOW_MINUTES*60000;
+   let h=`<div class="gtable" style="--v8-grid-width:${gridWidth}px"><div class="ghead"><div class="gcorner">CHANNELS</div><div class="gtimes">`;
+   for(let i=0;i<slots;i++){
+     const d=new Date(guideStart.getTime()+i*30*60000);
+     h+=`<div class="gtime">${i===0||d.getHours()===0&&d.getMinutes()===0?dayLabel(d)+' · ':''}${time(d)}</div>`;
+   }
+   h+='</div></div>';
+   const byKey=new Map();
+   for(const c of list){
+     byKey.set(c.key,c);
+     const a=(c.id&&byId.get(c.id))||[];
+     const ps=a.filter(p=>p.stop>guideStart&&p.start<end);
+     let blocks='';
+     for(let j=0;j<ps.length;j++){
+       const p=ps[j];
+       const begin=Math.max(0,(p.start-guideStart)/60000);
+       const finish=Math.min(V8_WINDOW_MINUTES,(p.stop-guideStart)/60000);
+       const left=begin*V8_PX_PER_MINUTE;
+       const width=Math.max(1,(finish-begin)*V8_PX_PER_MINUTE);
+       const isNow=p.start<=now&&p.stop>now;
+       blocks+=`<div class="gprog ${isNow?'now':''}" data-k="${esc(c.key)}" data-i="${j}" style="left:${left}px;width:${width}px" title="${esc(p.title)}"><b>${esc(p.title)}</b></div>`;
+     }
+     if(!ps.length){
+       blocks=`<div class="gprog" data-k="${esc(c.key)}" data-no-epg="1" style="left:0;width:${gridWidth}px" title="${esc(c.name)}"><b>${esc(c.name)}</b></div>`;
+     }
+     h+=`<div class="grow"><div class="gchan ${state.active&&state.active.key===c.key?'selected':''}"><img src="${esc(c.logo||'')}" onerror="this.style.visibility='hidden'"><b>${esc(c.name)}</b><button type="button" class="v16FavStar ${favs.has(c.key)?'on':''}" data-fav-key="${esc(c.key)}" aria-label="${favs.has(c.key)?'Remove from':'Add to'} favorites" title="${favs.has(c.key)?'Remove from':'Add to'} favorites">${favs.has(c.key)?'★':'☆'}</button></div><div class="gprogs">${blocks}</div></div>`;
+   }
+   h+='</div>';
+   const body=$('#guideBody');
+   const previousTop=body.scrollTop;
+   body.innerHTML=h;
+   const line=document.createElement('div');line.id='guideNowLine';line.className='nowLine';body.appendChild(line);
+   const tri=document.createElement('div');tri.id='guideNowTriangle';tri.className='nowTriangle';body.appendChild(tri);
+   updateNowLine();
+   body.onclick=e=>{
+     const star=e.target.closest('.v16FavStar');
+     if(star){
+       const c=byKey.get(star.dataset.favKey);
+       if(c){
+         toggleFav(c);
+         body.querySelectorAll('.v16FavStar').forEach(b=>{
+           if(b.dataset.favKey===c.key){
+             const on=favs.has(c.key);b.classList.toggle('on',on);b.textContent=on?'★':'☆';
+             b.title=(on?'Remove from':'Add to')+' favorites';b.setAttribute('aria-label',b.title);
+           }
+         });
+         if(v5GuideFilter==='FAVORITES')showGuide();
+       }
+       return;
+     }
+     const el=e.target.closest('.gprog');if(!el)return;
+     const c=byKey.get(el.dataset.k);if(!c)return;
+     const visible=((c.id&&byId.get(c.id))||[]).filter(p=>p.stop>guideStart&&p.start<end);
+     const noEpg=el.dataset.noEpg==='1';
+     const p=noEpg?null:visible[Number(el.dataset.i)];if(!noEpg&&!p)return;
+     info(c,p);
+     body.querySelectorAll('.gprog.selected').forEach(x=>x.classList.remove('selected'));
+     el.classList.add('selected');
+     const t=new Date();
+      const airing=noEpg||(p.start<=t&&p.stop>t);
+     const clickKey=noEpg ? String(c.key)+'|NO_EPG' : String(c.key)+'|'+p.start.getTime()+'|'+p.stop.getTime();
+     if(airing){
+       if(v11FirstClickKey===clickKey){
+         v11FirstClickKey=null;
+         closeGuide();
+       }else{
+         v11FirstClickKey=clickKey;
+         v7UnlockSound();play(c);moveVideoIntoGuide();
+       }
+     }else{
+       // Future/past programs show details only; a different selection resets the two-click sequence.
+       v11FirstClickKey=null;
+     }
+   };
+   const initial=state.active||list[0];
+   if(initial)info(initial,currentFor(initial));
+   $('#guideLayer').classList.remove('hidden');
+   document.documentElement.classList.remove('v6Booting');
+   startNowClock();
+   body.scrollLeft=0;
+   body.scrollTop=previousTop;
+   // Returning from fullscreen follows the channel currently playing, even if
+   // the viewer changed channels since the last visit to the guide.
+   if(options.followActive && state.active){
+     const activeIndex=list.findIndex(c=>c.key===state.active.key);
+     if(activeIndex>=0){
+       const activeRow=body.querySelectorAll('.grow')[activeIndex];
+       if(activeRow){
+         const viewport=body.clientHeight;
+         body.scrollTop=Math.max(0,activeRow.offsetTop-body.offsetTop-Math.max(65,(viewport-activeRow.offsetHeight)/2));
+         const current=activeRow.querySelector('.gprog.now')||activeRow.querySelector('.gprog');
+         if(current){current.classList.add('selected');
+           const c=state.active, p=currentFor(c);
+           info(c,p);
+           // The first click should retune, not unexpectedly jump to fullscreen.
+           v11FirstClickKey=null;
+         }
+       }
+     }else{
+       // An active channel may be excluded by Favorites, category or search.
+       // Reset the filters so the currently playing channel is always visible.
+       v5GuideFilter='ALL';v5GuideQuery='';
+       const search=$('#v5GuideSearch');if(search)search.value='';
+       v5RefreshFilterButtons();
+       if(state.channels.some(c=>c.key===state.active.key))showGuide({followActive:true});
+     }
+   }
+ }
+ function closeGuide(){v11FirstClickKey=null;stopNowClock();v7EnterLive();
+ }
+ return {
+   fromFile,fromUrl,showGuide,closeGuide,v8Navigate,v11ResetClicks:()=>{v11FirstClickKey=null},parseCached:(text)=>parse(text),
+   searchText:(c)=>{
+     const now=new Date(),end=new Date(now.getTime()+12*60*60*1000);
+     const a=(c&&c.id&&byId.get(c.id))||[];
+     return a.filter(p=>p.stop>now&&p.start<end).map(p=>p.title||'').join(' ');
+   },
+   currentTitle:(c)=>{
+     const p=c?currentFor(c):null;
+     return p?.title||'';
+   },
+   currentProgram:(c)=>{
+     const p=c?currentFor(c):null;
+     return p?{title:p.title,stop:p.stop}:null;
+   }
+ };
+})();
+window.addEventListener('DOMContentLoaded',()=>{
+ try{
+  $('#closeEpg').onclick=()=>$('#epgModal').classList.add('hidden');
+  $('#chooseEpg').onclick=()=>$('#epgFile').click();
+  $('#epgFile').onchange=async e=>{try{const f=e.target.files[0];if(f)await GuideEPG.fromFile(f)}catch(x){$('#epgStatus').textContent='EPG error: '+x.message}};
+  $('#loadEpgUrl').onclick=async()=>{try{$('#epgStatus').textContent='Loading EPG…';await GuideEPG.fromUrl($('#epgUrl').value.trim())}catch(x){$('#epgStatus').textContent='EPG URL blocked/failed: '+x.message+' • Use CHOOSE GUIDE.XML / GUIDE.XML.GZ instead.'}};
+  $('#guideBtn').onclick=()=>GuideEPG.showGuide();
+  $('#v5ExitGuide').onclick=()=>GuideEPG.closeGuide();
+   $('#v8Prev').onclick=()=>GuideEPG.v8Navigate(-1);
+   $('#v8Now').onclick=()=>GuideEPG.v8Navigate(0);
+   $('#v8Next').onclick=()=>GuideEPG.v8Navigate(1);
+
+  $('#v5GuideToolbar').addEventListener('click',e=>{
+    const b=e.target.closest('[data-filter]');
+    if(!b)return;
+    v5GuideFilter=b.dataset.filter;
+    v5RefreshFilterButtons();
+    GuideEPG.showGuide();
+  });
+  let v5SearchTimer=null;
+  $('#v5GuideSearch').addEventListener('input',e=>{
+    v5GuideQuery=e.target.value;
+    clearTimeout(v5SearchTimer);
+    v5SearchTimer=setTimeout(()=>GuideEPG.showGuide(),140);
+  });
+  $('#v7SoundPrompt').onclick=e=>{e.stopPropagation();v7UnlockSound()};
+  // A direct click counts as the user gesture Chrome needs to enable audio.
+  const previewSound=$('#v16PreviewSound');
+  function syncPreviewSound(){const v=$('#video');if(!v||!previewSound)return;previewSound.textContent=(v.muted||v.volume===0)?'🔊 UNMUTE':'🔇 MUTE';previewSound.setAttribute('aria-label',(v.muted||v.volume===0)?'Unmute preview':'Mute preview')}
+  previewSound.onclick=e=>{e.stopPropagation();const v=$('#video');if(v.muted||v.volume===0){v7SoundUnlocked=true;v.volume=1;v.muted=false;v.play().catch(()=>{v.muted=true;v.play().catch(()=>{});});}else v.muted=true;syncPreviewSound()};
+  $('#video').addEventListener('volumechange',syncPreviewSound);
+  syncPreviewSound();
+  $('#v7PausePlay').onclick=e=>{e.stopPropagation();const v=$('#video');const wasPaused=v.paused;if(!v7SoundUnlocked){v7UnlockSound();if(!wasPaused){v13PausedSinceTune=true;v.pause()}}else if(wasPaused)v.play().catch(()=>{});else{v13PausedSinceTune=true;v.pause()}v7UpdateLiveControls()};
+  $('#v7GoLive').onclick=e=>{e.stopPropagation();v7UnlockSound();v7GoLive()};
+  $('#video').addEventListener('click',()=>{if(document.body.classList.contains('v7Live'))v7ReturnToGuide();else if(document.body.classList.contains('v7NeedsSound'))v7UnlockSound()});
+  $('.videoWrap').addEventListener('click',e=>{if(document.body.classList.contains('v7Live'))v7ReturnToGuide()});
+  ['timeupdate','progress','playing','pause','durationchange','loadedmetadata'].forEach(ev=>$('#video').addEventListener(ev,v7UpdateLiveControls));
+  $('#video').addEventListener('playing',()=>document.body.classList.remove('v7NeedsSound'));
+  ['loadedmetadata','resize','playing','emptied'].forEach(ev=>$('#video').addEventListener(ev,updateStreamSpecs));
+  setInterval(v7UpdateLiveControls,1000);
+
+  // V10: show playback controls on mouse movement, hide after 3 seconds idle.
+  // A paused picture keeps the controls visible until playback resumes.
+  let v10HideTimer=null;
+  let v10OverControls=false;
+  const v10Controls=$('#v7LiveControls');
+  const v10Video=$('#video');
+  function v10ShowControls(){
+    if(!document.body.classList.contains('v7Live'))return;
+    document.body.classList.add('v10ControlsVisible');
+    v10ScheduleHide();
+  }
+  function v10ScheduleHide(){
+    clearTimeout(v10HideTimer);
+    if(v10OverControls||v10Video.paused)return;
+    v10HideTimer=setTimeout(()=>{
+      if(!v10OverControls&&!v10Video.paused)
+        document.body.classList.remove('v10ControlsVisible');
+    },3000);
+  }
+  document.addEventListener('mousemove',e=>{
+    if(document.body.classList.contains('v7Live'))v10ShowControls();
+  },{passive:true});
+  v10Controls.addEventListener('mouseenter',()=>{
+    v10OverControls=true;
+    clearTimeout(v10HideTimer);
+    document.body.classList.add('v10ControlsVisible');
+  });
+  v10Controls.addEventListener('mouseleave',()=>{
+    v10OverControls=false;
+    v10ScheduleHide();
+  });
+  v10Video.addEventListener('pause',()=>{
+    if(document.body.classList.contains('v7Live')){
+      clearTimeout(v10HideTimer);
+      document.body.classList.add('v10ControlsVisible');
+    }
+  });
+  v10Video.addEventListener('play',()=>v10ScheduleHide());
+
+ }catch(e){console.error(e)}
+});
+
+
+// V15: UI-only improvements to primary playback; multiview has its own isolated players.
+const V15=(()=>{
+ const $v=id=>document.getElementById(id);
+ let tiles=[null,null,null,null], players=[null,null,null,null], count=4, audio=0, opened=false, priorActive=null, focused=-1;
+ function currentProgram(){
+  const name=$v('nowProgram')?.textContent||'';
+  $v('v15Channel').textContent=state.active?.name||'LIVE TV';
+  $v('v15Program').textContent=name;
+  // Program timeline is informational only; never seeks within the live stream.
+  const fill=$v('v15ProgressFill');
+  let pct=0;
+  try{const p=GuideEPG.currentProgram(state.active);if(p){const start=new Date(p.start).getTime(),stop=new Date(p.stop).getTime();if(stop>start)pct=Math.max(0,Math.min(100,(Date.now()-start)/(stop-start)*100))}}catch(e){}
+  if(fill)fill.style.width=pct+'%';
+ }
+ function volumeUI(){const v=$v('video');const b=$v('v15Mute');if(!v||!b)return;b.textContent=v.muted||v.volume===0?'🔇 UNMUTE':'🔊 MUTE';$v('v15Volume').value=Math.round(v.volume*100)}
+ function release(i){const p=players[i];if(p){try{p.video.pause()}catch(e){};try{p.hls?.destroy()}catch(e){};try{p.ts?.destroy()}catch(e){};try{p.video.removeAttribute('src');p.video.load()}catch(e){};players[i]=null}}
+ function start(i){
+  release(i);const c=tiles[i];if(!c||!opened)return;
+  const tile=$v('v15tile'+i),v=tile?.querySelector('video');if(!v)return;
+  const p={video:v,hls:null,ts:null};players[i]=p;v.muted=i!==audio;v.volume=1;v.playsInline=true;v.autoplay=true;
+  const url=c.url,clean=url.split('?')[0].toLowerCase(),hls=/\.m3u8(?:\?|$)/i.test(url)||clean.endsWith('.m3u8');
+  const ts=clean.endsWith('.ts')||/\/live\/[^/]+\/[^/]+\/\d+(?:\.ts)?(?:\?|$)/i.test(url);
+  const showError=()=>{const e=tile.querySelector('.v15MVError');if(e)e.textContent='Stream unavailable or codec unsupported'};
+  try{
+   if(hls&&v.canPlayType('application/vnd.apple.mpegurl')){v.src=url;v.play().catch(showError)}
+   else if(hls&&window.Hls&&Hls.isSupported()){
+    p.hls=new Hls({enableWorker:true,backBufferLength:30,maxBufferLength:30});p.hls.loadSource(url);p.hls.attachMedia(v);
+    p.hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(showError));
+    p.hls.on(Hls.Events.ERROR,(_e,d)=>{if(d?.fatal)showError()});
+   }else if((ts||!hls)&&window.mpegts&&mpegts.isSupported()){
+    p.ts=mpegts.createPlayer({type:'mpegts',isLive:true,url,cors:true,withCredentials:false},{enableWorker:true,enableStashBuffer:false,stashInitialSize:128});
+    p.ts.attachMediaElement(v);p.ts.load();p.ts.play();p.ts.on(mpegts.Events.ERROR,showError);
+   }else{v.src=url;v.play().catch(showError)}
+  }catch(e){showError()}
+ }
+ function setAudio(i){audio=i;for(let j=0;j<count;j++){if(players[j])players[j].video.muted=j!==i;$v('v15tile'+j)?.classList.toggle('audio',j===i)};for(let j=0;j<count;j++){const b=$v('v15audio'+j);if(b)b.textContent=j===i?'🔊 AUDIO ON':'🔇 AUDIO'}}
+ function pick(i){const panel=$v('v15pick'+i);panel.classList.add('open');const input=panel.querySelector('input');input.value='';choices(i,'');input.focus()}
+ function choices(i,q){const box=$v('v15choices'+i);box.replaceChildren();const matches=state.channels.filter(c=>(c.name+' '+c.group).toLowerCase().includes(q.toLowerCase())).slice(0,120);
+  for(const c of matches){const b=document.createElement('button');b.type='button';b.textContent=c.name;const sm=document.createElement('small');sm.textContent=c.group;b.appendChild(sm);b.onclick=()=>{tiles[i]=c;$v('v15pick'+i).classList.remove('open');render();};box.appendChild(b)}
+ }
+ function focus(i){if(!opened||!tiles[i])return;focused=i;const panel=$v('v15MV');panel.classList.add('focused');for(let j=0;j<count;j++)$v('v15tile'+j)?.classList.toggle('v16FocusedTile',j===i);setAudio(i)}
+ function unfocus(){focused=-1;$v('v15MV').classList.remove('focused');for(let j=0;j<count;j++)$v('v15tile'+j)?.classList.remove('v16FocusedTile')}
+ function render(){unfocus();const grid=$v('v15MVGrid');grid.className='v15MVGrid'+(count===2?' two':count===3?' three':'');
+  for(let j=0;j<4;j++)release(j);grid.replaceChildren();
+  for(let i=0;i<count;i++){
+   const c=tiles[i],tile=document.createElement('div');tile.className='v15MVTile'+(i===audio?' audio':'')+(count===3&&i===2?' threeLast':'');tile.id='v15tile'+i;
+   if(c){const v=document.createElement('video');v.autoplay=true;v.playsInline=true;tile.appendChild(v);v.ondblclick=()=>focus(i);const err=document.createElement('div');err.className='v15MVError';err.style.cssText='position:absolute;top:10px;color:#ffaaa9;font-size:12px;z-index:2';tile.appendChild(err)}
+   else{const add=document.createElement('button');add.className='v15MVEmpty';add.textContent='+ ADD CHANNEL';add.onclick=()=>pick(i);tile.appendChild(add)}
+   const bar=document.createElement('div');bar.className='v15MVTileBar';const label=document.createElement('span');label.textContent=c?.name||'EMPTY SCREEN';bar.appendChild(label);
+   if(c){const ab=document.createElement('button');ab.id='v15audio'+i;ab.textContent=i===audio?'🔊 AUDIO ON':'🔇 AUDIO';ab.onclick=()=>setAudio(i);bar.appendChild(ab);const change=document.createElement('button');change.textContent='CHANGE';change.onclick=()=>pick(i);bar.appendChild(change);const remove=document.createElement('button');remove.textContent='✕';remove.title='Remove channel';remove.onclick=()=>{tiles[i]=null;render()};bar.appendChild(remove)}
+   tile.appendChild(bar);
+   const picker=document.createElement('div');picker.className='v15MVPicker';picker.id='v15pick'+i;
+   const search=document.createElement('input');search.className='v15MVSearch';search.placeholder='Search channels…';search.oninput=()=>choices(i,search.value);picker.appendChild(search);
+   const results=document.createElement('div');results.className='v15MVChoices';results.id='v15choices'+i;picker.appendChild(results);
+   const cancel=document.createElement('button');cancel.textContent='CANCEL';cancel.onclick=()=>picker.classList.remove('open');picker.appendChild(cancel);tile.appendChild(picker);grid.appendChild(tile);
+  }
+  for(let i=0;i<count;i++)if(tiles[i])start(i);
+  if(!tiles[audio]){const first=tiles.findIndex((c,i)=>i<count&&c);audio=first<0?0:first}setAudio(audio)
+ }
+ function open(){if(opened)return;opened=true;priorActive=state.active;tiles=[priorActive||null,null,null,null];count=4;audio=0;$v('v15Count').value='4';
+  // Stop the primary stream while in multiview to avoid a fifth connection.
+  destroyPlayback();$v('v15MV').classList.add('open');render();
+ }
+ function close(){if(!opened)return;unfocus();if(document.fullscreenElement===$v('v15MV'))document.exitFullscreen().catch(()=>{});opened=false;for(let i=0;i<4;i++)release(i);$v('v15MV').classList.remove('open');if(priorActive)play(priorActive);priorActive=null}
+ function init(){
+  $v('v15OpenMV').onclick=e=>{e.stopPropagation();open()};
+  $v('v15Guide').onclick=e=>{e.stopPropagation();v7ReturnToGuide()};
+  $v('v15Mute').onclick=e=>{e.stopPropagation();const v=$v('video');v.muted=!v.muted;volumeUI()};
+  $v('v15Volume').oninput=e=>{e.stopPropagation();const v=$v('video');v.volume=Number(e.target.value)/100;v.muted=v.volume===0;volumeUI()};
+  $v('video').addEventListener('volumechange',volumeUI);
+  $v('video').addEventListener('playing',currentProgram);
+  $v('v15Count').onchange=e=>{count=Number(e.target.value);render()};
+  $v('v15Close').onclick=close;
+  $v('v16FocusBack').onclick=unfocus;
+  $v('v16MVFullscreen').onclick=async()=>{const panel=$v('v15MV');try{if(document.fullscreenElement===panel)await document.exitFullscreen();else await panel.requestFullscreen()}catch(e){alert('Fullscreen is not available in this browser window.')}};
+  document.addEventListener('fullscreenchange',()=>{$v('v16MVFullscreen').textContent=document.fullscreenElement===$v('v15MV')?'⛶ EXIT FULLSCREEN':'⛶ FULLSCREEN QUAD'});
+  $v('v15Save').onclick=()=>{localStorage.setItem('joshiptv:v15multiview',JSON.stringify({count,keys:tiles.map(c=>c?.key||null)}));$v('v15Save').textContent='✓ SAVED';setTimeout(()=>$v('v15Save').textContent='SAVE LAYOUT',1500)};
+  $v('v15Load').onclick=()=>{let saved;try{saved=JSON.parse(localStorage.getItem('joshiptv:v15multiview')||'null')}catch(e){}if(!saved){alert('No saved multiview layout yet.');return}count=[2,3,4].includes(saved.count)?saved.count:4;tiles=(saved.keys||[]).slice(0,4).map(key=>state.channels.find(c=>c.key===key)||null);while(tiles.length<4)tiles.push(null);audio=0;$v('v15Count').value=String(count);render()};
+  setInterval(currentProgram,5000);volumeUI();currentProgram();
+ }
+ document.addEventListener('DOMContentLoaded',init);
+ return {open,close,isOpen:()=>opened};
+})();
+</script>
+
+<section id="epgModal" class="epgLayer hidden">
+ <div class="epgCard">
+  <div class="epgHead"><b>JOSH IPTV EPG</b><button id="closeEpg" class="secondary small">CLOSE</button></div>
+  <div class="hint">Load your XMLTV guide. This does not change the playlist or playback engine.</div>
+  <div class="epgControls"><input id="epgUrl" value="https://raw.githubusercontent.com/joshmradio/josh-epg/main/guide.xml.gz"><button id="loadEpgUrl" class="primary">LOAD URL</button></div>
+  <div class="or">OR</div>
+  <button id="chooseEpg" class="secondary">CHOOSE GUIDE.XML / GUIDE.XML.GZ</button>
+  <input id="epgFile" class="hidden" type="file" accept=".xml,.gz,.xml.gz,application/xml,application/gzip">
+  <div id="epgStatus" class="hint" style="margin-top:12px">EPG not loaded yet.</div>
+ </div>
+</section>
+<section id="guideLayer" class="guideLayer hidden">
+ <div class="guidePreview">
+   <div id="guideVideoBox" class="guideVideoBox"></div>
+   <div class="guideInfo">
+     <div id="guideInfoTitle" class="guideInfoTitle">TV Guide</div>
+     <div id="guideInfoMeta" class="guideInfoMeta"></div>
+     <div id="guideInfoDesc" class="guideInfoDesc">Browse the guide while your current channel continues playing.</div>
+     <div id="guideInfoChannel" class="guideInfoChannel"></div>
+     <div id="streamSpecs" class="streamSpecs" aria-live="polite"><span class="streamSpec">Video: Waiting</span><span class="streamSpec">Audio: Unknown</span></div>
+     <button id="v5ExitGuide" class="v5ExitGuide">EXIT GUIDE →</button>
+     <div class="guideStar">☆</div>
+   </div>
+ </div>
+ <div class="guideHead"><b>TV GUIDE</b><span id="guideRange"></span><div class="v8GuideNav"><button id="v8Prev" title="Earlier programs">‹ EARLIER</button><button id="v8Now" title="Jump to current time">NOW</button><button id="v8Next" title="Later programs">LATER ›</button></div><button id="v16GuideSettingsBtn" type="button" class="v16GuideSettingsBtn" title="Playlist settings and refresh">⚙ SETTINGS</button><label class="guideThemePicker">GUIDE COLOR <input id="guideColor" type="color" value="#ffffff" aria-label="Guide accent color"></label></div>
+ <div id="v5GuideToolbar" class="v5GuideToolbar">
+   <button class="v5GuideFilter active" data-filter="ALL">ALL CHANNELS</button>
+   <button class="v5GuideFilter" data-filter="FAVORITES">★ FAVORITES</button>
+   <div id="v5CategoryFilters" class="v5CategoryFilters"></div>
+   <input id="v5GuideSearch" class="v5GuideSearch" type="search" placeholder="Search channels or programs…">
+ </div>
+ <div id="guideBody" class="guideBody"></div>
+</section>
+
+
+<script>
+(function(){
+  const BUILTIN_M3U_B64="";
+  const PLAYLIST_URL="";
+  const EPG_URL="https://raw.githubusercontent.com/joshmradio/josh-epg/main/guide.xml.gz";
+
+  function builtinM3U(){
+    const bin=atob(BUILTIN_M3U_B64);
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function applyGuideColor(hex){
+    if(!/^#[0-9a-f]{6}$/i.test(hex))return;
+    document.documentElement.style.setProperty('--guide-accent',hex);
+    const n=parseInt(hex.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+    document.documentElement.style.setProperty('--guide-accent-soft',`rgba(${r},${g},${b},.28)`);
+    document.documentElement.style.setProperty('--guide-accent-line',`rgba(${r},${g},${b},.58)`);
+    try{localStorage.setItem('joshGuideColor',hex)}catch(e){}
+  }
+  const V16Playlist=(()=>{
+    const status=()=>document.getElementById('v16PlaylistStatus');
+    let busy=false;
+    const saved=()=>{try{return JSON.parse(localStorage.getItem('joshiptv:v16PlaylistCheck')||'null')}catch(e){return null}};
+    const stamp=t=>new Date(t).toLocaleString();
+    function show(message,success){const el=status();if(!el)return;el.textContent=message;el.style.color=success===false?'#ffb4a8':success===true?'#a9e6c3':'#e3e9f4'}
+    function previous(){const x=saved();if(x)show((x.ok?'✓ Playlist updated: ':'⚠ Last refresh failed: ')+stamp(x.at)+(x.ok?' · '+x.count+' channels':''),x.ok);else show('Not yet checked this session.');}
+    async function refresh(){if(busy)return false;if(V15.isOpen()){show('Exit Multiview before refreshing your channel list.',false);return false}busy=true;const b=document.getElementById('v16RefreshPlaylist');if(b)b.disabled=true;show('Checking playlist for updates…');try{
+      const playlistUrl=localStorage.getItem('joshiptv:url');if(!playlistUrl)throw Error('Enter your playlist URL in setup first');const r=await fetch(playlistUrl,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);
+      const t=await r.text();if(!t.includes('#EXTM3U'))throw Error('Response was not an M3U playlist');
+      const parsed=parseM3U(t);if(!parsed.length)throw Error('No channels found');
+      // Preserve the playing video; only update the playlist and guide data.
+      const old=state.active;loadText(t,'Latest Dropbox playlist');
+      if(old){const match=state.channels.find(c=>c.key===old.key)||state.channels.find(c=>c.name===old.name);if(match)state.active=match;renderChannels()}
+      try{if(document.getElementById('guide')&&!document.getElementById('guide').classList.contains('hidden'))GuideEPG.showGuide()}catch(e){}
+      const record={ok:true,at:Date.now(),count:parsed.length};localStorage.setItem('joshiptv:v16PlaylistCheck',JSON.stringify(record));show('✓ Playlist updated '+stamp(record.at)+' · '+parsed.length+' channels',true);return true;
+    }catch(e){const record={ok:false,at:Date.now()};localStorage.setItem('joshiptv:v16PlaylistCheck',JSON.stringify(record));show('⚠ Playlist refresh failed ('+e.message+'). Existing playlist preserved.',false);return false}finally{busy=false;if(b)b.disabled=false}}
+    document.addEventListener('DOMContentLoaded',()=>{const panel=document.getElementById('v16Settings');const openSettings=()=>{panel.classList.toggle('open');previous()};document.getElementById('v16SettingsBtn').onclick=openSettings;document.getElementById('v16GuideSettingsBtn').onclick=openSettings;document.getElementById('v16SettingsClose').onclick=()=>panel.classList.remove('open');document.getElementById('v16RefreshPlaylist').onclick=refresh;previous()});
+    return {refresh,previous};
+  })();
+  async function bootJoshIPTV(){
+    setTimeout(()=>document.documentElement.classList.remove('v6Booting'),12000);
+
+    // Public-safe build: no private streams or playlist URL embedded in source.
+    // The viewer supplies the URL on their own device, stored in localStorage.
+    const configured=localStorage.getItem('joshiptv:url');
+    if(!configured){
+      document.documentElement.classList.remove('v6Booting');
+      $('#setup').classList.remove('hidden');
+      $('#app').classList.add('hidden');
+      return;
+    }
+    try{
+      const r=await fetch(configured,{cache:'no-store'});
+      if(!r.ok)throw Error('HTTP '+r.status);
+      loadText(await r.text(),'Your playlist');
+    }catch(e){
+      document.documentElement.classList.remove('v6Booting');
+      $('#setup').classList.remove('hidden');
+      $('#app').classList.add('hidden');
+      $('#url').value=configured;
+      $('#setupError').textContent='Could not load saved playlist. Check the URL or choose an M3U file.';
+      return;
+    }
+
+    // Restore guide color.
+    let saved='#ffffff';
+    try{saved=localStorage.getItem('joshGuideColor')||saved}catch(e){}
+    applyGuideColor(saved);
+    const picker=$('#guideColor');
+    if(picker){
+      picker.value=saved;
+      picker.addEventListener('input',e=>applyGuideColor(e.target.value));
+    }
+
+    // V16: use the same verified Dropbox refresh routine on launch and on demand.
+    // Refresh in the background without delaying startup playback.
+    Promise.resolve().then(()=>V16Playlist.refresh()).catch(e=>console.warn('Playlist refresh skipped',e));
+
+    // Automatically load the permanent EPG every launch.
+    try{
+      $('#status').textContent='Loading guide…';
+      await Promise.race([GuideEPG.fromUrl(EPG_URL),new Promise((_,reject)=>setTimeout(()=>reject(new Error('EPG request timed out')),8500))]);
+      $('#status').textContent=`Ready • ${state.channels.length} channels • EPG loaded`;
+    }catch(e){
+      console.warn('Automatic EPG load failed',e);
+      $('#status').textContent=`Ready • ${state.channels.length} channels • EPG auto-load failed`;
+    }
+
+    // V5 guide is the home screen.
+    v5BuildCategoryFilters();
+    v5RefreshFilterButtons();
+
+    // Restore last channel with sound enabled. Chrome may require a user gesture for audible autoplay.
+    try{
+      const lastKey=localStorage.getItem('joshiptv:last');
+      const lastChannel=(lastKey?state.channels.find(c=>c.key===lastKey):null)||state.channels[0]||null;
+      if(lastChannel){
+        destroyPlayback();
+        const v=$('#video');
+        v.pause();
+        v.removeAttribute('src');
+        v.load();
+        v.muted=false;
+        v.volume=1;
+        setTimeout(()=>{
+          play(lastChannel);
+          // Chrome can reject audible autoplay. Keep the picture moving by retrying muted.
+          // Do not override an intentional user pause or a channel change.
+          let retries=0;
+          const keepPreviewPlaying=()=>{
+            if(state.active?.key!==lastChannel.key || v13PausedSinceTune || !v.paused)return;
+            v.muted=true;
+            v.play().then(()=>{
+              document.body.classList.remove('v7NeedsSound');
+              v7UpdateLiveControls();
+            }).catch(()=>{
+              if(++retries<5)setTimeout(keepPreviewPlaying,1100);
+              else document.body.classList.add('v7NeedsSound');
+            });
+          };
+          setTimeout(keepPreviewPlaying,900);
+          setTimeout(keepPreviewPlaying,2500);
+          setTimeout(keepPreviewPlaying,4500);
+        },350);
+      }
+    }catch(e){
+      console.warn('Last-channel restore failed',e);
+    }
+
+    // Open directly into the guide with the remembered channel in the live preview.
+    setTimeout(()=>GuideEPG.showGuide({followActive:true}),550);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bootJoshIPTV,{once:true});
+  else bootJoshIPTV();
+})();
+</script>
+
+<div id="v7LiveControls" class="v7LiveControls v15Controls">
+<div class="v15Top"><div><div id="v15Channel" class="v15Title">LIVE TV</div><div id="v15Program" class="v15Sub"></div></div><span class="v15LiveTag">● LIVE TV</span></div>
+<div class="v15Progress" title="Current program progress (not seekable)"><div id="v15ProgressFill"></div></div>
+<div class="v15Buttons"><div><button id="v7PausePlay" class="v7Control">⏸ PAUSE</button><button id="v7GoLive" class="v7Control" hidden>▶ GO LIVE</button><button id="v15Mute" type="button">🔊 MUTE</button><input id="v15Volume" type="range" min="0" max="100" value="100" aria-label="Volume"></div><div><button id="v15OpenMV" type="button">▦ MULTIVIEW</button><button id="v15Guide" type="button">☷ GUIDE</button></div></div></div>
+<div id="v16Settings" class="v16Settings" aria-label="Playlist settings"><div class="v16Row"><h3>PLAYLIST SETTINGS</h3><button id="v16SettingsClose">✕</button></div><div id="v16PlaylistStatus">Checking playlist…</div><div class="v16Row"><button id="v16RefreshPlaylist">↻ REFRESH PLAYLIST</button></div><p>Refresh checks your playlist URL without closing the player. Your current video will keep playing. If the update fails, the existing channel list stays in place.</p></div>
+<div id="v15MV" class="v15MV" aria-label="Multiview"><div class="v15MVHead"><strong>JOSH IPTV · MULTIVIEW</strong><label>LAYOUT <select id="v15Count"><option value="2">2 SCREENS</option><option value="3">3 SCREENS</option><option value="4" selected>4 SCREENS</option></select></label><button id="v15Save">SAVE LAYOUT</button><button id="v15Load">LOAD SAVED</button><button id="v16FocusBack" class="v16FocusBack">▦ BACK TO MULTIVIEW</button><button id="v16MVFullscreen">⛶ FULLSCREEN QUAD</button><button id="v15Close">✕ EXIT MULTIVIEW</button></div><div id="v15MVGrid" class="v15MVGrid"></div><div class="v15MVFoot">Click a screen's AUDIO button to hear it. Double-click a picture to enlarge it within Multiview; use BACK TO MULTIVIEW to return. Each channel uses a separate connection.</div></div>
+
+<script>
+/* Mobile V1: native iOS media affordances, without relocating the existing video. */
+(function(){
+ const mobile=()=>/iPhone|iPad|iPod/i.test(navigator.userAgent);
+ if(!mobile())return;
+ function prepare(){
+  const v=document.getElementById('video');if(!v)return;
+  v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');
+  v.setAttribute('preload','auto');
+  v.addEventListener('error',()=>{const status=document.getElementById('status');if(status&&v.error)status.textContent='Stream not supported on iPhone or network blocked';});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',prepare);else prepare();
+})();
+</script>
+</body></html>
